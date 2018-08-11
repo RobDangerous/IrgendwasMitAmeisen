@@ -121,7 +121,7 @@ namespace {
 			tree->render(tex_tree, mLocation_tree, mLocation_tree_inverse, diffuse_tree, specular_tree, specular_power_tree);
 		}
 
-		renderWater(getProjectionMatrix() * getViewMatrix(), 0.0f);
+		renderWater(getProjectionMatrix() * getViewMatrix(), getViewMatrix(), 0.0f);
 
 		Graphics4::end();
 		Graphics4::swapBuffers();
