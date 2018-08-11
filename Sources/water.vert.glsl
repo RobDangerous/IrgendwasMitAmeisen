@@ -1,7 +1,7 @@
 #version 450
 
 uniform sampler2D tex;
-uniform mat4 matrix;
+uniform mat4 transformation;
 uniform float time;
 uniform float zoffset;
 
@@ -76,6 +76,6 @@ void main() {
 	vec2 newpos = vec2(pos.x, pos.y + zoffset);
 	//vec4 coord = texture2D(tex, pos);
 	float height = map(newpos); //sin(pos.x + time) * sin(pos.x + time * 1.1) + sin(pos.y + time * 1.1) * sin(pos.y + time * 1.2);
-	gl_Position = matrix * vec4(newpos.x, height /*coord.r*/, newpos.y, 1.0);
+	gl_Position = transformation * vec4(newpos.x, height /*coord.r*/, newpos.y, 1.0);
 	color = vec4(height / 2.0, height / 2.0, 1.0 + height / 2.0 /*coord.r*/, 0.0);
 }
