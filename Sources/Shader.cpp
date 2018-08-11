@@ -33,10 +33,10 @@ namespace {
 	
 	// Tree shader
 	bool renderTrees = true;
-	Graphics4::VertexStructure structure_tree;
+	Graphics4::VertexStructure vertex_structure;
 	Graphics4::Shader* vertexShader_tree;
 	Graphics4::Shader* fragmentShader_tree;
-	Graphics4::PipelineState* pipeline_tree;
+	Graphics4::PipelineState* pipeline_mesh;
 	
 	Graphics4::TextureUnit tex_tree;
 	Graphics4::ConstantLocation pLocation_tree;
@@ -50,7 +50,8 @@ namespace {
 	Graphics4::ConstantLocation lightCount_tree;
 	
 	MeshObject* tree;
-	
+	MeshObject* sphere;
+	MeshObject* AntBridge;
 	// Keyboard controls
 	bool rotate = false;
 	bool W, A, S, D = false;
@@ -113,13 +114,19 @@ namespace {
 			mat4 P = getProjectionMatrix();
 			mat4 V = getViewMatrix();
 		
-			Graphics4::setPipeline(pipeline_tree);
+			Graphics4::setPipeline(pipeline_mesh);
 			
 			Graphics4::setMatrix(vLocation_tree, V);
 			Graphics4::setMatrix(pLocation_tree, P);
 			
 			tree->setLights(lightCount_tree, lightPosLocation_tree);
 			tree->render(tex_tree, mLocation_tree, mLocation_tree_inverse, diffuse_tree, specular_tree, specular_power_tree);
+
+			sphere->setLights(lightCount_tree, lightPosLocation_tree);
+			sphere->render(tex_tree, mLocation_tree, mLocation_tree_inverse, diffuse_tree, specular_tree, specular_power_tree);
+
+			AntBridge->setLights(lightCount_tree, lightPosLocation_tree);
+			AntBridge->render(tex_tree, mLocation_tree, mLocation_tree_inverse, diffuse_tree, specular_tree, specular_power_tree);
 		}
 
 		renderWater(getProjectionMatrix() * getViewMatrix(), 0.0f);
@@ -209,36 +216,54 @@ void loadTreeShader() {
 	vertexShader_tree = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
 	fragmentShader_tree = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 	
-	structure_tree.add("pos", Graphics4::Float3VertexData);
-	structure_tree.add("tex", Graphics4::Float2VertexData);
-	structure_tree.add("nor", Graphics4::Float3VertexData);
+	vertex_structure.add("pos", Graphics4::Float3VertexData);
+	vertex_structure.add("tex", Graphics4::Float2VertexData);
+	vertex_structure.add("nor", Graphics4::Float3VertexData);
 	
-	pipeline_tree = new Graphics4::PipelineState();
-	pipeline_tree->inputLayout[0] = &structure_tree;
-	pipeline_tree->inputLayout[1] = nullptr;
-	pipeline_tree->vertexShader = vertexShader_tree;
-	pipeline_tree->fragmentShader = fragmentShader_tree;
-	pipeline_tree->depthMode = Graphics4::ZCompareLess;
-	pipeline_tree->depthWrite = true;
-	pipeline_tree->blendSource = Graphics4::SourceAlpha;
-	pipeline_tree->blendDestination = Graphics4::InverseSourceAlpha;
-	pipeline_tree->alphaBlendSource = Graphics4::SourceAlpha;
-	pipeline_tree->alphaBlendDestination = Graphics4::InverseSourceAlpha;
-	pipeline_tree->compile();
+	pipeline_mesh = new Graphics4::PipelineState();
+	pipeline_mesh->inputLayout[0] = &vertex_structure;
+	pipeline_mesh->inputLayout[1] = nullptr;
+	pipeline_mesh->vertexShader = vertexShader_tree;
+	pipeline_mesh->fragmentShader = fragmentShader_tree;
+	pipeline_mesh->depthMode = Graphics4::ZCompareLess;
+	pipeline_mesh->depthWrite = true;
+	pipeline_mesh->blendSource = Graphics4::SourceAlpha;
+	pipeline_mesh->blendDestination = Graphics4::InverseSourceAlpha;
+	pipeline_mesh->alphaBlendSource = Graphics4::SourceAlpha;
+	pipeline_mesh->alphaBlendDestination = Graphics4::InverseSourceAlpha;
+	pipeline_mesh->compile();
 	
-	tex_tree = pipeline_tree->getTextureUnit("tex");
+	tex_tree = pipeline_mesh->getTextureUnit("tex");
 	Graphics4::setTextureAddressing(tex_tree, Graphics4::U, Graphics4::Repeat);
 	Graphics4::setTextureAddressing(tex_tree, Graphics4::V, Graphics4::Repeat);
 	
-	pLocation_tree = pipeline_tree->getConstantLocation("P");
-	vLocation_tree = pipeline_tree->getConstantLocation("V");
-	mLocation_tree = pipeline_tree->getConstantLocation("M");
-	mLocation_tree_inverse = pipeline_tree->getConstantLocation("MInverse");
-	diffuse_tree = pipeline_tree->getConstantLocation("diffuseCol");
-	specular_tree = pipeline_tree->getConstantLocation("specularCol");
-	specular_power_tree = pipeline_tree->getConstantLocation("specularPow");
-	lightPosLocation_tree = pipeline_tree->getConstantLocation("lightPos");
-	lightCount_tree = pipeline_tree->getConstantLocation("numLights");
+	pLocation_tree = pipeline_mesh->getConstantLocation("P");
+	vLocation_tree = pipeline_mesh->getConstantLocation("V");
+	mLocation_tree = pipeline_mesh->getConstantLocation("M");
+	mLocation_tree_inverse = pipeline_mesh->getConstantLocation("MInverse");
+	diffuse_tree = pipeline_mesh->getConstantLocation("diffuseCol");
+	specular_tree = pipeline_mesh->getConstantLocation("specularCol");
+	specular_power_tree = pipeline_mesh->getConstantLocation("specularPow");
+	lightPosLocation_tree = pipeline_mesh->getConstantLocation("lightPos");
+	lightCount_tree = pipeline_mesh->getConstantLocation("numLights");
+}
+
+void rotateBlenderMesh(MeshObject* blenderMesh)
+{
+	Kore::Quaternion blenderMeshRotation = Kore::Quaternion(0, 0, 0, 1);
+	blenderMeshRotation.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+	blenderMeshRotation.rotate(Kore::Quaternion(vec3(0, 0, 1), Kore::pi / 2.0));
+	blenderMesh->M = mat4::Translation(0, 0, 0) * blenderMeshRotation.matrix().Transpose();
+}
+
+void translateMeshObject(MeshObject* blenderMesh, float x, float y, float z)
+{
+	blenderMesh->M = blenderMesh->M * mat4::Translation(x,y,z).Transpose();
+}
+
+void scaleMeshObject(MeshObject* mesh, float scale)
+{
+	mesh->M = mesh->M * mat4::Scale(scale).Transpose();
 }
 
 int kore(int argc, char** argv) {
@@ -251,12 +276,18 @@ int kore(int argc, char** argv) {
 	Keyboard::the()->KeyUp = keyUp;
 
 	loadTreeShader();
-	tree = new MeshObject("Tree02/tree02.ogex", "Tree02/", structure_tree, 1.0);
-	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
-	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
-	treeRot.rotate(Kore::Quaternion(vec3(0, 0, 1), Kore::pi / 2.0));
-	tree->M = mat4::Translation(0, 0, 0) * treeRot.matrix().Transpose();
+	tree = new MeshObject("Tree02/tree02.ogex", "Tree02/", vertex_structure, 1.0f);
+	rotateBlenderMesh(tree);
 	
+	sphere = new MeshObject("Sphere/sphere.ogex", "Sphere/", vertex_structure, 1.0f);
+	scaleMeshObject(sphere, 0.1f);
+	rotateBlenderMesh(sphere);
+	translateMeshObject(sphere, 3, 2, 3);
+
+	/*AntBridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", vertex_structure, 1.0f);
+	rotateBlenderMesh(AntBridge);
+	translateMeshObject(AntBridge, -2, 2, -2);*/
+
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();
