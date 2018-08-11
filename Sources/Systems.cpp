@@ -18,16 +18,20 @@ void updateBridge(Bridge* bridge, Storage& storage, float deltaTime);
 std::pair<Island*,Island*> getIslandWithMoreAnts(Island* islandA, Island* islandB);
 bool isBridgeDone(float bridgeLength, float antsGathered);
 float calcAntsNeededForBridge(float bridgeLength);
+float currentBridgeLength(Bridge* bridge);
 
 int createIsland(Storage& storage, Kore::vec3 position, float radius, float ressources)
 {
 	Island* island = new Island();
-	storage.islands[storage.nextIsland++] = island;
 	island->position = position;
 	island->radius = radius;
 	island->antsOnIsland = 0.0f;
 	island->initialRessources = ressources;
 	island->currentRessources = ressources;
+
+	int id = storage.nextIsland++;
+	storage.islands[id] = island;
+	return id;
 }
 
 int createBridge(Storage& storage, int islandIDfrom, int islandIDto)
@@ -41,6 +45,10 @@ int createBridge(Storage& storage, int islandIDfrom, int islandIDto)
 	bridge->islandIDfrom = islandIDfrom;
 	bridge->islandIDto = islandIDto;
 	bridge->completedSinceSeconds = 0.0f;
+
+	int id = storage.nextBridge++;
+	storage.bridges[id] = bridge;
+	return id;
 }
 
 void updateGameObjects(Storage& storage ,float deltaTime)
@@ -117,4 +125,10 @@ bool isBridgeDone(float bridgeLength, float antsGathered)
 float calcAntsNeededForBridge(float bridgeLength)
 {
 	return ceil(bridgeLength * antsNeededPerBridgeSizeValue);
+}
+
+float currentBridgeLength(Bridge* bridge)
+{
+	float percentage = calcAntsNeededForBridge(bridge->length) / bridge->antsGathered;
+	return percentage * bridge->length;
 }

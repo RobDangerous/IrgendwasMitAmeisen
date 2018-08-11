@@ -11,6 +11,7 @@
 
 #include "MeshObject.h"
 
+
 using namespace Kore;
 
 namespace {
@@ -81,7 +82,7 @@ namespace {
 	}
 
 	void update() {
-		float t = (float)(System::time() - startTime);
+		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
 		lastTime = t;
 		
