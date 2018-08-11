@@ -136,6 +136,7 @@ namespace {
 		lastTime = t;
 		
 		updateGameObjects(storage, deltaT);
+		Ant::moveEverybody(deltaT);
 
 		cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
@@ -157,7 +158,7 @@ namespace {
 		
 		
 		Graphics4::begin();
-		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag, Kore::Graphics1::Color::Black, 1.0f, 0);
+		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag, Kore::Graphics1::Color::Green, 1.0f, 0);
 		
 		mat4 P = getProjectionMatrix();
 		mat4 V = getViewMatrix();
@@ -344,6 +345,7 @@ int kore(int argc, char** argv) {
 	initWater();
 	loadLivingRoomShader();
 	Ant::init();
+	Ant::updateDirections();
 	
 	setUpGameLogic();
 
