@@ -28,8 +28,9 @@ int createIsland(Storage* storage, Kore::vec3 position, float radius, float ress
 	island->antsOnIsland = 0.0f;
 	island->initialRessources = ressources;
 	island->currentRessources = ressources;
-
+	
 	int id = storage->nextIsland++;
+	island->id = id;
 	storage->islands[id] = island;
 	return id;
 }
