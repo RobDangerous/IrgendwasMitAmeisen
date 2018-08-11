@@ -10,9 +10,9 @@
 #include <Kore/Log.h>
 
 #include "Baum.h"
-#include "water.h"
+#include "Water.h"
 #include "MeshObject.h"
-#include "gameObjects.h"
+#include "GameObjects.h"
 #include "Systems.h"
 
 using namespace Kore;
@@ -83,6 +83,8 @@ namespace {
 		double deltaT = t - lastTime;
 		lastTime = t;
 		
+		updateGameObjects(storage, deltaT);
+
 		cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
 		forward = cameraUp.cross(right);  // cross product
@@ -259,7 +261,7 @@ void setUpGameLogic()
 	storage = new Storage();
 	int id0 = createIsland(storage, vec3(2, 0.75f, 2), 1, 100);
 	int id1 = createIsland(storage, vec3(4, 0.75f, 4), 1, 100);
-
+	storage->islands[id0]->antsOnIsland = 50;
 	createBridge(storage, id0, id1);
 }
 
@@ -278,9 +280,7 @@ int kore(int argc, char** argv) {
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-	/*AntBridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", vertex_structure, 1.0f);
-	rotateBlenderMesh(AntBridge);
-	translateMeshObject(AntBridge, -2, 2, -2);*/
+	bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
 
 	cameraPos = vec3(-5, 5, 5);
 

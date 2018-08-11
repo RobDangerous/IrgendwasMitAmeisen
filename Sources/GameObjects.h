@@ -19,6 +19,8 @@ struct Island
 
 struct Bridge
 {
+	int id;
+
 	int islandIDfrom;
 	int islandIDto;
 	

@@ -1,7 +1,8 @@
+#include <Kore/pch.h>
 #include "Systems.h"
 #include <math.h>
 #include <utility>
-
+#include <Kore/Log.h>
 		// Todo: tune me right
 //bridge values
 float antsNeededPerBridgeSizeValue = 10.0;
@@ -48,6 +49,7 @@ int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 	bridge->completedSinceSeconds = 0.0f;
 
 	int id = storage->nextBridge++;
+	bridge->id = id;
 	storage->bridges[id] = bridge;
 	return id;
 }
@@ -75,11 +77,14 @@ void updateIsland(Island* island, float deltaTime)
 		{
 			//create ants if ressources are available
 			island->antsOnIsland += antCreationPerSecond * deltaTime;
+			Kore::log(Kore::LogLevel::Info, "Island %i has currently %f ants", island->id, island->antsOnIsland);
 			//remove ressources per ant on island
 			island->currentRessources -= floorf(island->antsOnIsland) * ressourceConsumptionPerAntPerSecond * deltaTime;
+			Kore::log(Kore::LogLevel::Info, "Island %i ressources reduced to %f", island->id, island->currentRessources);
 		}
 		else
 		{
+			Kore::log(Kore::LogLevel::Info, "Island %i ants are starving", island->id);
 			//ants starve
 			island->antsOnIsland -= island->antsOnIsland * antStarvationPerSecond * deltaTime;
 		}
@@ -91,13 +96,15 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 	Island* fromIsland = storage->islands[bridge->islandIDfrom];
 	if (isBridgeDone(bridge->length, bridge->antsGathered))
 	{
-		float antsMoved = bridge->length * antsValueSpeedPerSecond * deltaTime;
+
+		float antsMoved = deltaTime * bridge->length / antsValueSpeedPerSecond ;
 		//if bridges are already build, create ant equilibrium between connected islands
 		Island* toIsland = storage->islands[bridge->islandIDto];
 		
 		std::pair<Island*, Island*> islandInhabitantsComparison = getIslandWithMoreAnts(fromIsland, toIsland);
 		islandInhabitantsComparison.first->antsOnIsland -= antsMoved;
 		islandInhabitantsComparison.second->antsOnIsland += antsMoved;
+		Kore::log(Kore::LogLevel::Info, "%f ants moved from island %i to island %i.", antsMoved, islandInhabitantsComparison.first->id, islandInhabitantsComparison.second->id);
 	}
 	else {
 		//update bridge building with ants -> size
@@ -105,7 +112,9 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 		if (fromIsland->antsOnIsland >= antsConsumedForBridge)
 		{
 			bridge->antsGathered += antsConsumedForBridge;
+			Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
 			fromIsland->antsOnIsland -= antsConsumedForBridge;
+			Kore::log(Kore::LogLevel::Info, "Bridge %i build removed %f ants from island %i", bridge->id, antsConsumedForBridge, bridge->islandIDfrom);
 		}
 		//else island does not have enough ants	
 	}

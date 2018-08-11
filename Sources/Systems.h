@@ -2,7 +2,7 @@
 #include "pch.h"
 
 #include <Kore/Math/Vector.h>
-#include "gameObjects.h"
+#include "GameObjects.h"
 
 //return the island ID
 int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources);
