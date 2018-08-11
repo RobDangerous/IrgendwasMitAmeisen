@@ -113,6 +113,8 @@ namespace {
 		
 		Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(mLocation, planet->M);
+		Graphics4::setMatrix(vLocation, V);
+		Graphics4::setMatrix(pLocation, P);
 		planet->render(tex);
 		
 		Graphics4::end();
