@@ -1,13 +1,12 @@
 #include "pch.h"
 
-#include "water.h"
+#include "Water.h"
 
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
 #include <Kore/Graphics4/Texture.h>
 #include <Kore/IO/FileReader.h>
 #include <Kore/Math/Core.h>
-#include <Kore/Math/Random.h>
 #include <Kore/System.h>
 
 using namespace Kore;
@@ -32,8 +31,6 @@ namespace {
 }
 
 void initWater() {
-	Random::init(0);
-
 	octave_m.Set(0, 0, 1.6f);
 	octave_m.Set(0, 1, 1.2f);
 	octave_m.Set(1, 0, -1.2f);
