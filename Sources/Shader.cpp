@@ -106,7 +106,7 @@ namespace {
 		
 		
 		Graphics4::begin();
-		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag, Kore::Graphics1::Color::Green, 1.0f, 0);
+		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag, Kore::Graphics1::Color::Black, 1.0f, 0);
 		
 		if (renderTrees) {
 			mat4 P = getProjectionMatrix();
