@@ -10,9 +10,9 @@
 #include <Kore/Log.h>
 
 #include "Baum.h"
-#include "water.h"
+#include "Water.h"
 #include "MeshObject.h"
-
+#include "Ant.h"
 
 using namespace Kore;
 
@@ -251,6 +251,7 @@ int kore(int argc, char** argv) {
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();
+	Ant::init();
 	
 	Kore::System::start();
 
