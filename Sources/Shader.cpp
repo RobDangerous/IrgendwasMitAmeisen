@@ -12,7 +12,10 @@
 #include "Baum.h"
 #include "Water.h"
 #include "MeshObject.h"
+#include "GameObjects.h"
+#include "Systems.h"
 #include "Ant.h"
+
 
 using namespace Kore;
 
@@ -92,6 +95,9 @@ namespace {
 
 	Baum* tree;
 	MeshObject* planet;
+	MeshObject* bridge;
+	Storage* storage;
+
 
 	// Keyboard controls
 	bool rotate = false;
@@ -129,6 +135,8 @@ namespace {
 		double deltaT = t - lastTime;
 		lastTime = t;
 		
+		updateGameObjects(storage, deltaT);
+
 		cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
 		forward = cameraUp.cross(right);  // cross product
@@ -167,11 +175,32 @@ namespace {
 		}
 		
 		Graphics4::setPipeline(pipeline);
-		Graphics4::setMatrix(mLocation, planet->M);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
-		planet->render(tex);
+
+		//render islands
+		for (int i = 0; i < storage->nextIsland; ++i)
+		{
+			mat4 tempM = planet->M;
+			vec3& islandPosition = storage->islands[i]->position;
+			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->render(tex);
+		}
 		
+		//render bridges
+		for (int i = 0; i < storage->nextBridge; ++i)
+		{
+			mat4 tempM = bridge->M;
+			Bridge* logicBridge = storage->bridges[i];
+			vec3 islandFromPosition = storage->islands[logicBridge->islandIDfrom]->position;
+			vec3 islandToPosition = storage->islands[logicBridge->islandIDto]->position;
+
+			vec3 position = islandFromPosition + ((islandToPosition - islandFromPosition) * 0.5f);
+
+			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(position.x(), position.y(), position.z()));
+			bridge->render(tex);
+		}
+
 		Graphics4::end();
 		Graphics4::swapBuffers();
 	}
@@ -284,6 +313,15 @@ void loadShader() {
 	mLocation = pipeline->getConstantLocation("M");
 }
 
+void setUpGameLogic()
+{
+	storage = new Storage();
+	int id0 = createIsland(storage, vec3(2, 0.75f, 2), 1, 100);
+	int id1 = createIsland(storage, vec3(4, 0.75f, 4), 1, 100);
+	storage->islands[id0]->antsOnIsland = 50;
+	createBridge(storage, id0, id1);
+}
+
 int kore(int argc, char** argv) {
 	Kore::System::init("Shader", width, height);
 	Kore::System::setCallback(update);
@@ -298,10 +336,8 @@ int kore(int argc, char** argv) {
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
-
-	/*AntBridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", vertex_structure, 1.0f);
-	rotateBlenderMesh(AntBridge);
-	translateMeshObject(AntBridge, -2, 2, -2);*/
+	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
+	bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
 
 	cameraPos = vec3(-5, 5, 5);
 
@@ -309,6 +345,8 @@ int kore(int argc, char** argv) {
 	loadLivingRoomShader();
 	Ant::init();
 	
+	setUpGameLogic();
+
 	Kore::System::start();
 
 	return 0;
