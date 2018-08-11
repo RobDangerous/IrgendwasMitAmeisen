@@ -81,8 +81,8 @@ void initWater() {
 	float xpos = -1.0;
 	for (int y = 0; y < ydiv; ++y) {
 		for (int x = 0; x < xdiv; ++x) {
-			vertices[y * xdiv * 2 + x * 2 + 0] = (x - (xdiv / 2)) / (xdiv / 2) * 30.0f;
-			vertices[y * xdiv * 2 + x * 2 + 1] = (y - (ydiv / 2)) / (ydiv / 2) * 100.0f;
+			vertices[y * xdiv * 2 + x * 2 + 0] = (x - (xdiv / 2.0f)) / (xdiv / 2.0f) * 30.0f;
+			vertices[y * xdiv * 2 + x * 2 + 1] = (y - (ydiv / 2.0f)) / (ydiv / 2.0f) * 100.0f;
 		}
 	}
 	vertexBuffer->unlock();
