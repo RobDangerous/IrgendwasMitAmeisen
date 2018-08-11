@@ -17,6 +17,7 @@ namespace {
 	Texture* vertexMap;
 	TextureUnit vertexMapLocation;
 	ConstantLocation matrixLocation;
+	ConstantLocation vmatrixLocation;
 	ConstantLocation timeLocation;
 	ConstantLocation zoffsetLocation;
 	PipelineState* pipeline;
@@ -72,6 +73,7 @@ void initWater() {
 
 	vertexMapLocation = pipeline->getTextureUnit("tex");
 	matrixLocation = pipeline->getConstantLocation("transformation");
+	vmatrixLocation = pipeline->getConstantLocation("vtransformation");
 	timeLocation = pipeline->getConstantLocation("time");
 	zoffsetLocation = pipeline->getConstantLocation("zoffset");
 
@@ -102,11 +104,12 @@ void initWater() {
 	indexBuffer->unlock();
 }
 
-void renderWater(mat4 matrix, float zposition) {
+void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
 	Graphics4::setPipeline(pipeline);
 	Graphics4::setFloat(timeLocation, (float)System::time());
 	Graphics4::setFloat(zoffsetLocation, zposition - 5.0f);
 	Graphics4::setMatrix(matrixLocation, matrix);
+	Graphics4::setMatrix(vmatrixLocation, vmatrix);
 	Graphics4::setTexture(vertexMapLocation, vertexMap);
 	Graphics4::setIndexBuffer(*indexBuffer);
 	Graphics4::setVertexBuffer(*vertexBuffer);
