@@ -88,12 +88,12 @@ namespace {
 		mat4 P = getProjectionMatrix();
 		mat4 V = getViewMatrix();
 
-		renderWater(P * V, 0.0f);
+		renderWater(P * V, V, 0.0f);
 		
 		if (renderTrees) {
 			tree->render(P, V);
 		}
-
+		
 		Graphics4::end();
 		Graphics4::swapBuffers();
 	}

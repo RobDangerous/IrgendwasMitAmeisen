@@ -2,12 +2,15 @@
 
 uniform sampler2D tex;
 uniform mat4 transformation;
+uniform mat4 vtransformation;
 uniform float time;
 uniform float zoffset;
 
 in vec2 pos;
 
 out mediump vec4 color;
+out vec3 normal;
+out vec3 halfway;
 
 const int ITER_GEOMETRY = 3;
 const float SEA_CHOPPY = 4.0;
@@ -72,10 +75,30 @@ float map(vec2 uv) {
     return h;// p.y - h;
 }
 
+float map(float u, float v) {
+    return map(vec2(u, v));
+}
+
+const float eps = 0.001;
+
+// via https://mobile.twitter.com/erkaman2/status/988113178537099264
+vec3 calcNormal(float x, float z) {
+    return normalize(vec3(map(x - eps, z) - map(x + eps, z), 2.0 * eps, map(x, z - eps) - map(x, z + eps)));
+}
+
+const vec3 light = normalize (vec3 (2, 1, 3));
+
+// blinn phong code from http://schorsch.efi.fh-nuernberg.de/mshopf/index.php/Computergrafik/BlinnPhongInGLSL
 void main() {
 	vec2 newpos = vec2(pos.x, pos.y + zoffset);
 	//vec4 coord = texture2D(tex, pos);
 	float height = map(newpos); //sin(pos.x + time) * sin(pos.x + time * 1.1) + sin(pos.y + time * 1.1) * sin(pos.y + time * 1.2);
-	gl_Position = transformation * vec4(newpos.x, height /*coord.r*/, newpos.y, 1.0);
+    vec4 pos = vec4(newpos.x, height /*coord.r*/, newpos.y, 1.0);
+	gl_Position = transformation * pos;
+    normal = calcNormal(newpos.x, newpos.y);
+
+    vec3 view    = normalize (- vec3 (vtransformation * pos)); 
+    halfway      = normalize (view + light);
+
 	color = vec4(height / 2.0, height / 2.0, 1.0 + height / 2.0 /*coord.r*/, 0.0);
 }
