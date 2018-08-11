@@ -94,10 +94,10 @@ namespace {
 	}
 
 	Baum* tree;
+	Baum* tree2;
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
-
 
 	// Keyboard controls
 	bool rotate = false;
@@ -173,6 +173,7 @@ namespace {
 
 		if (renderTrees) {
 			tree->render(P, V);
+			//tree2->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
@@ -180,8 +181,7 @@ namespace {
 		Graphics4::setMatrix(pLocation, P);
 
 		//render islands
-		for (int i = 0; i < storage->nextIsland; ++i)
-		{
+		for (int i = 0; i < storage->nextIsland; ++i) {
 			mat4 tempM = planet->M;
 			vec3& islandPosition = storage->islands[i]->position;
 			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
@@ -189,8 +189,7 @@ namespace {
 		}
 		
 		//render bridges
-		for (int i = 0; i < storage->nextBridge; ++i)
-		{
+		for (int i = 0; i < storage->nextBridge; ++i) {
 			mat4 tempM = bridge->M;
 			Bridge* logicBridge = storage->bridges[i];
 			vec3 islandFromPosition = storage->islands[logicBridge->islandIDfrom]->position;
@@ -334,9 +333,11 @@ int kore(int argc, char** argv) {
 
 
 	tree = new Baum("Tree02/tree02.ogex", "Tree02/");
+	//tree2 = new Baum("tree_stump/pine_tree.ogex", "tree_stump/");
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
+
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
 	bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
 

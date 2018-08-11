@@ -20,8 +20,13 @@ namespace {
 			vertices[i * 8 + 1] = mesh->vertices[i * 3 + 1] * vertexScale;
 			vertices[i * 8 + 2] = mesh->vertices[i * 3 + 2] * vertexScale;
 			// texCoord
-			vertices[i * 8 + 3] = mesh->texcoord[i * 2 + 0] * texScaleX;
-			vertices[i * 8 + 4] = (1.0f - mesh->texcoord[i * 2 + 1]) * texScaleY;
+			if (mesh->texcoord != nullptr) {
+				vertices[i * 8 + 3] = mesh->texcoord[i * 2 + 0] * texScaleX;
+				vertices[i * 8 + 4] = (1.0f - mesh->texcoord[i * 2 + 1]) * texScaleY;
+			} else {
+				vertices[i * 8 + 3] = 0;
+				vertices[i * 8 + 4] = 0;
+			}
 			// normal
 			vertices[i * 8 + 5] = mesh->normals[i * 3 + 0];
 			vertices[i * 8 + 6] = mesh->normals[i * 3 + 1];
@@ -150,6 +155,10 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 			std::strcat(temp, material->textureName);
 			log(Info, "Load Texture %s", temp);
 			images[j] = new Texture(temp);
+		} else {
+			//log(Info, "Load Texture white");
+			Texture* whiteTex = new Graphics4::Texture("white.png", true);
+			images[j] = whiteTex;
 		}
 		
 		// Mesh Vertex Buffer
