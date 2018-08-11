@@ -71,11 +71,11 @@ void initWater() {
 	pipeline->compile();
 
 	vertexMapLocation = pipeline->getTextureUnit("tex");
-	matrixLocation = pipeline->getConstantLocation("matrix");
+	matrixLocation = pipeline->getConstantLocation("transformation");
 	timeLocation = pipeline->getConstantLocation("time");
 	zoffsetLocation = pipeline->getConstantLocation("zoffset");
 
-	vertexBuffer = new VertexBuffer(xdiv * ydiv, structure, DynamicUsage);
+	vertexBuffer = new VertexBuffer(xdiv * ydiv, structure, StaticUsage);
 	float* vertices = vertexBuffer->lock();
 	float ypos = -1.0;
 	float xpos = -1.0;
