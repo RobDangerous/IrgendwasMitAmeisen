@@ -1,6 +1,5 @@
 #version 450
 
-uniform sampler2D tex;
 uniform mat4 transformation;
 uniform mat4 vtransformation;
 uniform float time;
