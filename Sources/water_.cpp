@@ -14,8 +14,6 @@ using namespace Kore;
 using namespace Kore::Graphics4;
 
 namespace {
-	Texture* vertexMap;
-	TextureUnit vertexMapLocation;
 	ConstantLocation matrixLocation;
 	ConstantLocation vmatrixLocation;
 	ConstantLocation timeLocation;
@@ -46,13 +44,6 @@ void initWater() {
 	Shader* vertexShader = new Shader(vs.readAll(), vs.size(), VertexShader);
 	Shader* fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
 
-	vertexMap = new Texture(1024, 1024, Image::Grey8, false);
-	u8* pixels = vertexMap->lock();
-	for (int y = 0; y < 1024; ++y)
-		for (int x = 0; x < 1024; ++x)
-			pixels[y * 1024 + x] = Random::get(255);
-	vertexMap->unlock();
-
 	VertexStructure structure;
 	structure.add("pos", Float2VertexData);
 	pipeline = new PipelineState();
@@ -71,7 +62,6 @@ void initWater() {
 	pipeline->stencilDepthFail = Keep;
 	pipeline->compile();
 
-	vertexMapLocation = pipeline->getTextureUnit("tex");
 	matrixLocation = pipeline->getConstantLocation("transformation");
 	vmatrixLocation = pipeline->getConstantLocation("vtransformation");
 	timeLocation = pipeline->getConstantLocation("time");
@@ -110,7 +100,6 @@ void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
 	Graphics4::setFloat(zoffsetLocation, zposition - 5.0f);
 	Graphics4::setMatrix(matrixLocation, matrix);
 	Graphics4::setMatrix(vmatrixLocation, vmatrix);
-	Graphics4::setTexture(vertexMapLocation, vertexMap);
 	Graphics4::setIndexBuffer(*indexBuffer);
 	Graphics4::setVertexBuffer(*vertexBuffer);
 	Graphics4::drawIndexedVertices();
