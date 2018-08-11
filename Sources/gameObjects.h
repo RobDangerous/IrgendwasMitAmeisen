@@ -1,12 +1,13 @@
 #pragma once
-#include <Kore/pch.h>
+#pragma once
+
 #include <Kore/Math/Vector.h>
 
 float totalAnts;
 float totalRessources;
 
 template <typename T>
-void initializeArrayOfPointers(T** arrayOfPointers, size_t arraySize);
+void initializeArrayOfPointers(T** arrayOfPointers, unsigned arraySize);
 
 struct Island 
 {
@@ -52,9 +53,9 @@ struct Storage
 };
 
 template <typename T>
-void initializeArrayOfPointers(T** arrayOfPointers, size_t arraySize)
+void initializeArrayOfPointers(T** arrayOfPointers, unsigned arraySize)
 {
-	for (size_t i = 0; i < arraySize; ++i)
+	for (unsigned i = 0; i < arraySize; ++i)
 	{
 		arrayOfPointers[i] = nullptr;
 	}

@@ -15,30 +15,33 @@ using namespace Kore;
 using namespace Kore::Graphics4;
 
 namespace {
+	
 	MeshObject* meshObject;
 	
-	Kore::Graphics4::VertexStructure structure_tree;
-	Kore::Graphics4::Shader* vertexShader_tree;
-	Kore::Graphics4::Shader* fragmentShader_tree;
-	Kore::Graphics4::PipelineState* pipeline_tree;
 	
-	Kore::Graphics4::TextureUnit tex_tree;
-	Kore::Graphics4::ConstantLocation pLocation_tree;
-	Kore::Graphics4::ConstantLocation vLocation_tree;
-	Kore::Graphics4::ConstantLocation mLocation_tree;
-	Kore::Graphics4::ConstantLocation mLocation_tree_inverse;
-	Kore::Graphics4::ConstantLocation diffuse_tree;
-	Kore::Graphics4::ConstantLocation specular_tree;
-	Kore::Graphics4::ConstantLocation specular_power_tree;
-	Kore::Graphics4::ConstantLocation lightPosLocation_tree;
-	Kore::Graphics4::ConstantLocation lightCount_tree;
+	Kore::Graphics4::VertexStructure structureTree;
+	Kore::Graphics4::Shader* vertexShader;
+	Kore::Graphics4::Shader* fragmentShader;
+	Kore::Graphics4::PipelineState* pipeline;
+	
+	Kore::Graphics4::TextureUnit tex;
+	Kore::Graphics4::ConstantLocation pLocation;
+	Kore::Graphics4::ConstantLocation vLocation;
+	Kore::Graphics4::ConstantLocation mLocation;
+	Kore::Graphics4::ConstantLocation mInverseLocation;
+	Kore::Graphics4::ConstantLocation diffuseLocation;
+	Kore::Graphics4::ConstantLocation specularLocation;
+	Kore::Graphics4::ConstantLocation specularPowerLocation;
+	Kore::Graphics4::ConstantLocation lightPosLocation;
+	Kore::Graphics4::ConstantLocation lightCount;
 }
 
-Baum::Baum(const char* meshFile, const char* texturePath) {
+Baum::Baum(const char* meshFile, const char* texturePath, float scale) {
 
 	loadShader();
 	
-	meshObject = new MeshObject(meshFile, texturePath, structure_tree, 1.0);
+	meshObject = new MeshObject(meshFile, texturePath, structureTree, scale);
+	
 	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	treeRot.rotate(Kore::Quaternion(vec3(0, 0, 1), Kore::pi / 2.0));
@@ -47,50 +50,49 @@ Baum::Baum(const char* meshFile, const char* texturePath) {
 
 void Baum::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 
-	Graphics4::setPipeline(pipeline_tree);
+	Graphics4::setPipeline(pipeline);
 	
-	Graphics4::setMatrix(vLocation_tree, viewMatrix);
-	Graphics4::setMatrix(pLocation_tree, projectionMatrix);
+	Graphics4::setMatrix(vLocation, viewMatrix);
+	Graphics4::setMatrix(pLocation, projectionMatrix);
 	
-	meshObject->setLights(lightCount_tree, lightPosLocation_tree);
-	meshObject->render(tex_tree, mLocation_tree, mLocation_tree_inverse, diffuse_tree, specular_tree, specular_power_tree);
+	meshObject->setLights(lightCount, lightPosLocation);
+	meshObject->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
 }
-
 
 void Baum::loadShader() {
 	FileReader vs("shader_tree.vert");
 	FileReader fs("shader_tree.frag");
-	vertexShader_tree = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
-	fragmentShader_tree = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
+	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
+	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 	
-	structure_tree.add("pos", Graphics4::Float3VertexData);
-	structure_tree.add("tex", Graphics4::Float2VertexData);
-	structure_tree.add("nor", Graphics4::Float3VertexData);
+	structureTree.add("pos", Graphics4::Float3VertexData);
+	structureTree.add("tex", Graphics4::Float2VertexData);
+	structureTree.add("nor", Graphics4::Float3VertexData);
 	
-	pipeline_tree = new Graphics4::PipelineState();
-	pipeline_tree->inputLayout[0] = &structure_tree;
-	pipeline_tree->inputLayout[1] = nullptr;
-	pipeline_tree->vertexShader = vertexShader_tree;
-	pipeline_tree->fragmentShader = fragmentShader_tree;
-	pipeline_tree->depthMode = Graphics4::ZCompareLess;
-	pipeline_tree->depthWrite = false;
-	pipeline_tree->blendSource = Graphics4::SourceAlpha;
-	pipeline_tree->blendDestination = Graphics4::InverseSourceAlpha;
-	pipeline_tree->alphaBlendSource = Graphics4::SourceAlpha;
-	pipeline_tree->alphaBlendDestination = Graphics4::InverseSourceAlpha;
-	pipeline_tree->compile();
+	pipeline = new Graphics4::PipelineState();
+	pipeline->inputLayout[0] = &structureTree;
+	pipeline->inputLayout[1] = nullptr;
+	pipeline->vertexShader = vertexShader;
+	pipeline->fragmentShader = fragmentShader;
+	pipeline->depthMode = Graphics4::ZCompareLess;
+	pipeline->depthWrite = false;
+	pipeline->blendSource = Graphics4::SourceAlpha;
+	pipeline->blendDestination = Graphics4::InverseSourceAlpha;
+	pipeline->alphaBlendSource = Graphics4::SourceAlpha;
+	pipeline->alphaBlendDestination = Graphics4::InverseSourceAlpha;
+	pipeline->compile();
 	
-	tex_tree = pipeline_tree->getTextureUnit("tex");
-	Graphics4::setTextureAddressing(tex_tree, Graphics4::U, Graphics4::Repeat);
-	Graphics4::setTextureAddressing(tex_tree, Graphics4::V, Graphics4::Repeat);
+	tex = pipeline->getTextureUnit("tex");
+	Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+	Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
 	
-	pLocation_tree = pipeline_tree->getConstantLocation("P");
-	vLocation_tree = pipeline_tree->getConstantLocation("V");
-	mLocation_tree = pipeline_tree->getConstantLocation("M");
-	mLocation_tree_inverse = pipeline_tree->getConstantLocation("MInverse");
-	diffuse_tree = pipeline_tree->getConstantLocation("diffuseCol");
-	specular_tree = pipeline_tree->getConstantLocation("specularCol");
-	specular_power_tree = pipeline_tree->getConstantLocation("specularPow");
-	lightPosLocation_tree = pipeline_tree->getConstantLocation("lightPos");
-	lightCount_tree = pipeline_tree->getConstantLocation("numLights");
+	pLocation = pipeline->getConstantLocation("P");
+	vLocation = pipeline->getConstantLocation("V");
+	mLocation = pipeline->getConstantLocation("M");
+	mInverseLocation = pipeline->getConstantLocation("MInverse");
+	diffuseLocation = pipeline->getConstantLocation("diffuseCol");
+	specularLocation = pipeline->getConstantLocation("specularCol");
+	specularPowerLocation = pipeline->getConstantLocation("specularPow");
+	lightPosLocation = pipeline->getConstantLocation("lightPos");
+	lightCount = pipeline->getConstantLocation("numLights");
 }

@@ -1,6 +1,7 @@
 #pragma once
-#include <Kore\pch.h>
-#include <Kore\Math\Vector.h>
+#include "pch.h"
+
+#include <Kore/Math/Vector.h>
 #include "gameObjects.h"
 
 //return the island ID
