@@ -11,6 +11,7 @@
 
 #include "Baum.h"
 #include "water.h"
+#include "MeshObject.h"
 
 
 using namespace Kore;
@@ -25,9 +26,22 @@ namespace {
 	const float CAMERA_ROTATION_SPEED = 0.05f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
+	// Simple shader
+	Graphics4::VertexStructure structure;
+	Graphics4::Shader* vertexShader;
+	Graphics4::Shader* fragmentShader;
+	Graphics4::PipelineState* pipeline;
+	
+	Graphics4::TextureUnit tex;
+	Graphics4::ConstantLocation pLocation;
+	Graphics4::ConstantLocation vLocation;
+	Graphics4::ConstantLocation mLocation;
+
+	
 	bool renderTrees = true;
 
 	Baum* tree;
+	MeshObject* planet;
 
 	// Keyboard controls
 	bool rotate = false;
@@ -96,6 +110,10 @@ namespace {
 		if (renderTrees) {
 			tree->render(P, V);
 		}
+		
+		Graphics4::setPipeline(pipeline);
+		Graphics4::setMatrix(mLocation, planet->M);
+		planet->render(tex);
 		
 		Graphics4::end();
 		Graphics4::swapBuffers();
@@ -176,7 +194,38 @@ void keyUp(KeyCode code) {
 	}
 }
 
-
+void loadShader() {
+	FileReader vs("shader.vert");
+	FileReader fs("shader.frag");
+	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
+	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
+	
+	// This defines the structure of your Vertex Buffer
+	structure.add("pos", Graphics4::Float3VertexData);
+	structure.add("tex", Graphics4::Float2VertexData);
+	structure.add("nor", Graphics4::Float3VertexData);
+	
+	pipeline = new Graphics4::PipelineState();
+	pipeline->inputLayout[0] = &structure;
+	pipeline->inputLayout[1] = nullptr;
+	pipeline->vertexShader = vertexShader;
+	pipeline->fragmentShader = fragmentShader;
+	pipeline->depthMode = Graphics4::ZCompareLess;
+	pipeline->depthWrite = true;
+	pipeline->blendSource = Graphics4::SourceAlpha;
+	pipeline->blendDestination = Graphics4::InverseSourceAlpha;
+	pipeline->alphaBlendSource = Graphics4::SourceAlpha;
+	pipeline->alphaBlendDestination = Graphics4::InverseSourceAlpha;
+	pipeline->compile();
+	
+	tex = pipeline->getTextureUnit("tex");
+	Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+	Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
+	
+	pLocation = pipeline->getConstantLocation("P");
+	vLocation = pipeline->getConstantLocation("V");
+	mLocation = pipeline->getConstantLocation("M");
+}
 
 int kore(int argc, char** argv) {
 	Kore::System::init("Shader", width, height);
@@ -189,6 +238,9 @@ int kore(int argc, char** argv) {
 
 
 	tree = new Baum("Tree02/tree02.ogex", "Tree02/");
+	
+	loadShader();
+	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	/*AntBridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", vertex_structure, 1.0f);
 	rotateBlenderMesh(AntBridge);
