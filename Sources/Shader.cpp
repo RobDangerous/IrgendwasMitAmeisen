@@ -37,8 +37,58 @@ namespace {
 	Graphics4::ConstantLocation vLocation;
 	Graphics4::ConstantLocation mLocation;
 
+	Graphics4::PipelineState* pipeline_living_room;
+	Graphics4::TextureUnit tex_living_room;
+	Graphics4::ConstantLocation pLocation_living_room;
+	Graphics4::ConstantLocation vLocation_living_room;
+	Graphics4::ConstantLocation mLocation_living_room;
+	Graphics4::ConstantLocation mLocation_living_room_inverse;
+	Graphics4::ConstantLocation diffuse_living_room;
+	Graphics4::ConstantLocation specular_living_room;
+	Graphics4::ConstantLocation specular_power_living_room;
+	Graphics4::ConstantLocation lightPosLocation_living_room;
+	Graphics4::ConstantLocation lightCount_living_room;
 	
 	bool renderTrees = true;
+
+	void loadLivingRoomShader() {
+		FileReader vs("shader_living_room.vert");
+		FileReader fs("shader_living_room.frag");
+		Graphics4::Shader* vertexShader_living_room = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
+		Graphics4::Shader* fragmentShader_living_room = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
+
+		Graphics4::VertexStructure structure_living_room;
+		structure_living_room.add("pos", Graphics4::Float3VertexData);
+		structure_living_room.add("tex", Graphics4::Float2VertexData);
+		structure_living_room.add("nor", Graphics4::Float3VertexData);
+
+		pipeline_living_room = new Graphics4::PipelineState;
+		pipeline_living_room->inputLayout[0] = &structure_living_room;
+		pipeline_living_room->inputLayout[1] = nullptr;
+		pipeline_living_room->vertexShader = vertexShader_living_room;
+		pipeline_living_room->fragmentShader = fragmentShader_living_room;
+		pipeline_living_room->depthMode = Graphics4::ZCompareLess;
+		pipeline_living_room->depthWrite = true;
+		pipeline_living_room->blendSource = Graphics4::SourceAlpha;
+		pipeline_living_room->blendDestination = Graphics4::InverseSourceAlpha;
+		pipeline_living_room->alphaBlendSource = Graphics4::SourceAlpha;
+		pipeline_living_room->alphaBlendDestination = Graphics4::InverseSourceAlpha;
+		pipeline_living_room->compile();
+
+		tex_living_room = pipeline_living_room->getTextureUnit("tex");
+		Graphics4::setTextureAddressing(tex_living_room, Graphics4::U, Graphics4::Repeat);
+		Graphics4::setTextureAddressing(tex_living_room, Graphics4::V, Graphics4::Repeat);
+
+		pLocation_living_room = pipeline_living_room->getConstantLocation("P");
+		vLocation_living_room = pipeline_living_room->getConstantLocation("V");
+		mLocation_living_room = pipeline_living_room->getConstantLocation("M");
+		mLocation_living_room_inverse = pipeline_living_room->getConstantLocation("MInverse");
+		diffuse_living_room = pipeline_living_room->getConstantLocation("diffuseCol");
+		specular_living_room = pipeline_living_room->getConstantLocation("specularCol");
+		specular_power_living_room = pipeline_living_room->getConstantLocation("specularPow");
+		lightPosLocation_living_room = pipeline_living_room->getConstantLocation("lightPos");
+		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
+	}
 
 	Baum* tree;
 	MeshObject* planet;
@@ -105,7 +155,12 @@ namespace {
 		mat4 V = getViewMatrix();
 
 		renderWater(P * V, V, 0.0f);
-		
+
+		Graphics4::setPipeline(pipeline_living_room);
+		//Ant::setLights(lightCount_living_room, lightPosLocation_living_room, livingRoom);
+		Graphics4::setMatrix(vLocation_living_room, V);
+		Graphics4::setMatrix(pLocation_living_room, P);
+		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
 			tree->render(P, V);
@@ -251,6 +306,7 @@ int kore(int argc, char** argv) {
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();
+	loadLivingRoomShader();
 	Ant::init();
 	
 	Kore::System::start();
