@@ -42,6 +42,7 @@ namespace {
 
 	Baum* tree;
 	MeshObject* planet;
+	Baum* tree2;
 
 	// Keyboard controls
 	bool rotate = false;
@@ -109,12 +110,14 @@ namespace {
 
 		if (renderTrees) {
 			tree->render(P, V);
+			//tree2->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
-		Graphics4::setMatrix(mLocation, planet->M);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
+		
+		Graphics4::setMatrix(mLocation, planet->M);
 		planet->render(tex);
 		
 		Graphics4::end();
@@ -243,6 +246,7 @@ int kore(int argc, char** argv) {
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
+	//tree2 = new Baum("tree_stump/pine_tree.ogex", "tree_stump/");
 
 	/*AntBridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", vertex_structure, 1.0f);
 	rotateBlenderMesh(AntBridge);
