@@ -14,13 +14,13 @@ float antStarvationPerSecond = 0.5f;
 //
 
 void updateIsland(Island* island, float deltaTime);
-void updateBridge(Bridge* bridge, Storage& storage, float deltaTime);
+void updateBridge(Bridge* bridge, Storage* storage, float deltaTime);
 std::pair<Island*,Island*> getIslandWithMoreAnts(Island* islandA, Island* islandB);
 bool isBridgeDone(float bridgeLength, float antsGathered);
 float calcAntsNeededForBridge(float bridgeLength);
 float currentBridgeLength(Bridge* bridge);
 
-int createIsland(Storage& storage, Kore::vec3 position, float radius, float ressources)
+int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources)
 {
 	Island* island = new Island();
 	island->position = position;
@@ -29,15 +29,15 @@ int createIsland(Storage& storage, Kore::vec3 position, float radius, float ress
 	island->initialRessources = ressources;
 	island->currentRessources = ressources;
 
-	int id = storage.nextIsland++;
-	storage.islands[id] = island;
+	int id = storage->nextIsland++;
+	storage->islands[id] = island;
 	return id;
 }
 
-int createBridge(Storage& storage, int islandIDfrom, int islandIDto)
+int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 {
-	Kore::vec3& islandPosFrom = storage.islands[islandIDfrom]->position;
-	Kore::vec3& islandPosTo = storage.islands[islandIDto]->position;
+	Kore::vec3& islandPosFrom = storage->islands[islandIDfrom]->position;
+	Kore::vec3& islandPosTo = storage->islands[islandIDto]->position;
 
 	Bridge* bridge = new Bridge();
 	bridge->length = islandPosFrom.distance(islandPosTo);
@@ -46,23 +46,23 @@ int createBridge(Storage& storage, int islandIDfrom, int islandIDto)
 	bridge->islandIDto = islandIDto;
 	bridge->completedSinceSeconds = 0.0f;
 
-	int id = storage.nextBridge++;
-	storage.bridges[id] = bridge;
+	int id = storage->nextBridge++;
+	storage->bridges[id] = bridge;
 	return id;
 }
 
-void updateGameObjects(Storage& storage ,float deltaTime)
+void updateGameObjects(Storage* storage ,float deltaTime)
 {
 	//update islands with ant production and ressource gathering
-	for (int id = 0; id < storage.nextIsland; ++id)
+	for (int id = 0; id < storage->nextIsland; ++id)
 	{
-		updateIsland(storage.islands[id], deltaTime);
+		updateIsland(storage->islands[id], deltaTime);
 	}
 		
 	
-	for (int id = 0; id < storage.nextBridge; ++id)
+	for (int id = 0; id < storage->nextBridge; ++id)
 	{
-		updateBridge(storage.bridges[id], storage, deltaTime);
+		updateBridge(storage->bridges[id], storage, deltaTime);
 	}
 }
 
@@ -85,14 +85,14 @@ void updateIsland(Island* island, float deltaTime)
 	}
 }
 
-void updateBridge(Bridge* bridge, Storage& storage, float deltaTime)
+void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 {
-	Island* fromIsland = storage.islands[bridge->islandIDfrom];
+	Island* fromIsland = storage->islands[bridge->islandIDfrom];
 	if (isBridgeDone(bridge->length, bridge->antsGathered))
 	{
 		float antsMoved = bridge->length * antsValueSpeedPerSecond * deltaTime;
 		//if bridges are already build, create ant equilibrium between connected islands
-		Island* toIsland = storage.islands[bridge->islandIDto];
+		Island* toIsland = storage->islands[bridge->islandIDto];
 		
 		std::pair<Island*, Island*> islandInhabitantsComparison = getIslandWithMoreAnts(fromIsland, toIsland);
 		islandInhabitantsComparison.first->antsOnIsland -= antsMoved;
