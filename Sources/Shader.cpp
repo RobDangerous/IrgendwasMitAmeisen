@@ -10,6 +10,7 @@
 #include <Kore/Log.h>
 
 #include "MeshObject.h"
+#include "water.h"
 
 using namespace Kore;
 
@@ -119,6 +120,8 @@ namespace {
 			tree->setLights(lightCount_tree, lightPosLocation_tree);
 			tree->render(tex_tree, mLocation_tree, mLocation_tree_inverse, diffuse_tree, specular_tree, specular_power_tree);
 		}
+
+		renderWater(getProjectionMatrix() * getViewMatrix(), 0.0f);
 
 		Graphics4::end();
 		Graphics4::swapBuffers();
@@ -254,6 +257,8 @@ int kore(int argc, char** argv) {
 	tree->M = mat4::Translation(0, 0, 0) * treeRot.matrix().Transpose();
 	
 	cameraPos = vec3(-5, 5, 5);
+
+	initWater();
 	
 	Kore::System::start();
 
