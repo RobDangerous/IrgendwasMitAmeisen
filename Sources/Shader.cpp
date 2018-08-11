@@ -14,6 +14,8 @@
 #include "MeshObject.h"
 #include "GameObjects.h"
 #include "Systems.h"
+#include "Ant.h"
+
 
 using namespace Kore;
 
@@ -285,6 +287,7 @@ int kore(int argc, char** argv) {
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();
+	Ant::init();
 	
 	setUpGameLogic();
 
