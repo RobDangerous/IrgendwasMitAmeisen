@@ -27,16 +27,16 @@ struct Bridge
 	
 	float antsNeeded;
 	float antsGathered;
-	float length;
-
-	int completedSinceSeconds;
+	float completeBridgeLength;
 };
 
 struct AntQueen
 {
 	Kore::vec3 position;
 	float radius;
-
+	const float queenSpeedPerSecond = 0.56f;
+	const float goalReachedRadius = 0.001f;
+	Kore::vec3 goalPoisition;
 };
 
 struct Storage

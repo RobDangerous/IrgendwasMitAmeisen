@@ -20,6 +20,7 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime);
 std::pair<IslandStruct*,IslandStruct*> getIslandWithMoreAnts(IslandStruct* islandA, IslandStruct* islandB);
 bool isBridgeDone(Bridge* bridge);
 void calcAntsNeededForBridge(Storage* storage, Bridge* bridge);
+void moveQueen(AntQueen * queen, float deltaTime);
 
 int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources)
 {
@@ -42,7 +43,6 @@ int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 	bridge->antsGathered = 0.0f;
 	bridge->islandIDfrom = islandIDfrom;
 	bridge->islandIDto = islandIDto;
-	bridge->completedSinceSeconds = 0.0f;
 	calcAntsNeededForBridge(storage, bridge);
 
 	int id = storage->nextBridge++;
@@ -54,6 +54,9 @@ int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 void updateGameObjects(Storage* storage ,float deltaTime)
 {
 	//update islands with ant production and ressource gathering
+
+	moveQueen(storage->antQueen, deltaTime);
+
 	for (int id = 0; id < storage->nextIsland; ++id)
 	{
 		updateIsland(storage->islands[id], deltaTime);
@@ -94,7 +97,7 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 	if (isBridgeDone(bridge))
 	{
 
-		float antsMoved = deltaTime * bridge->length / antsValueSpeedPerSecond ;
+		float antsMoved = deltaTime * bridge->completeBridgeLength / antsValueSpeedPerSecond ;
 		//if bridges are already build, create ant equilibrium between connected islands
 		IslandStruct* toIsland = storage->islands[bridge->islandIDto];
 		
@@ -134,7 +137,7 @@ void calcAntsNeededForBridge(Storage* storage, Bridge* bridge)
 	Kore::vec3& islandPosFrom = storage->islands[bridge->islandIDfrom]->position;
 	Kore::vec3& islandPosTo = storage->islands[bridge->islandIDto]->position;
 	float distance = islandPosFrom.distance(islandPosTo);
-	bridge->length = distance;
+	bridge->completeBridgeLength = distance;
 	float antsNeeded = ceil(distance * antsNeededPerBridgeSizeValue);
 	bridge->antsNeeded = antsNeeded;
 }
@@ -188,3 +191,25 @@ bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Isla
 	else return false;
 }
 
+void moveQueen(AntQueen * queen, float deltaTime)
+{
+	Kore::vec3 direction = queen->goalPoisition - queen->position;
+	float distanceToGoal = direction.getLength();
+	if (distanceToGoal < queen->goalReachedRadius)
+	{
+		queen->position = queen->goalPoisition;
+	}
+	else 
+	{
+		float stepLength = queen->queenSpeedPerSecond * deltaTime;
+		Kore::vec3 velocity = direction / distanceToGoal;
+		if (distanceToGoal < stepLength)
+		{
+			velocity *= distanceToGoal;
+		}
+		else {
+			velocity *= stepLength;
+		}
+		queen->position += velocity;
+	}
+}

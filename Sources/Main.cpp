@@ -34,6 +34,8 @@ namespace {
 	const float CAMERA_ROTATION_SPEED = 0.05f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
+	const float queenHeightOffset = 1.0f;
+
 	vec3 screenToWorldSpace(float posX, float posY);
 	// Simple shader
 	Graphics4::VertexStructure structure;
@@ -177,8 +179,12 @@ namespace {
 			if (selectIsland(storage, cameraPos, rayDir, selected))
 			{
 				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
+				vec3 queenGoalPosition = selected->position + vec3(0, queenHeightOffset, 0);
+				storage->antQueen->goalPoisition = queenGoalPosition;
 			}
 			leftMouseDown = false;
+
+			
 		}
 		
 		Graphics4::begin();
@@ -408,7 +414,8 @@ namespace {
 		int id0 = createIsland(storage, vec3(2.0f, 1.0f, 2.0f), 1, 100);
 		int id1 = createIsland(storage, vec3(4.0f, 1.0f, 4.0f), 1, 100);
 		AntQueen* antqueen = storage->antQueen;
-		antqueen->position = vec3(2.0f, 2.5f, 2.0f);
+		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
+		antqueen->goalPoisition = antqueen->position;
 		antqueen->radius = 0.5f;
 		storage->islands[id0]->antsOnIsland = 50;
 		createBridge(storage, id0, id1);
