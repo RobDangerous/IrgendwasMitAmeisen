@@ -17,9 +17,8 @@ float antStarvationPerSecond = 0.5f;
 void updateIsland(Island* island, float deltaTime);
 void updateBridge(Bridge* bridge, Storage* storage, float deltaTime);
 std::pair<Island*,Island*> getIslandWithMoreAnts(Island* islandA, Island* islandB);
-bool isBridgeDone(float bridgeLength, float antsGathered);
-float calcAntsNeededForBridge(float bridgeLength);
-float currentBridgeLength(Bridge* bridge);
+bool isBridgeDone(Bridge* bridge);
+void calcAntsNeededForBridge(Storage* storage, Bridge* bridge);
 
 int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources)
 {
@@ -38,15 +37,12 @@ int createIsland(Storage* storage, Kore::vec3 position, float radius, float ress
 
 int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 {
-	Kore::vec3& islandPosFrom = storage->islands[islandIDfrom]->position;
-	Kore::vec3& islandPosTo = storage->islands[islandIDto]->position;
-
 	Bridge* bridge = new Bridge();
-	bridge->length = islandPosFrom.distance(islandPosTo);
 	bridge->antsGathered = 0.0f;
 	bridge->islandIDfrom = islandIDfrom;
 	bridge->islandIDto = islandIDto;
 	bridge->completedSinceSeconds = 0.0f;
+	calcAntsNeededForBridge(storage, bridge);
 
 	int id = storage->nextBridge++;
 	bridge->id = id;
@@ -94,7 +90,7 @@ void updateIsland(Island* island, float deltaTime)
 void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 {
 	Island* fromIsland = storage->islands[bridge->islandIDfrom];
-	if (isBridgeDone(bridge->length, bridge->antsGathered))
+	if (isBridgeDone(bridge))
 	{
 
 		float antsMoved = deltaTime * bridge->length / antsValueSpeedPerSecond ;
@@ -127,18 +123,23 @@ std::pair<Island*, Island*> getIslandWithMoreAnts(Island* islandA, Island* islan
 	else return std::pair<Island*, Island*>(islandB, islandA);
 }
 
-bool isBridgeDone(float bridgeLength, float antsGathered)
+bool isBridgeDone(Bridge* bridge)
 {
-	return calcAntsNeededForBridge(bridgeLength) <= antsGathered;
+	return bridgeProgressPercentage(bridge) >= 1.0f;
 }
 
-float calcAntsNeededForBridge(float bridgeLength)
+void calcAntsNeededForBridge(Storage* storage, Bridge* bridge)
 {
-	return ceil(bridgeLength * antsNeededPerBridgeSizeValue);
+	Kore::vec3& islandPosFrom = storage->islands[bridge->islandIDfrom]->position;
+	Kore::vec3& islandPosTo = storage->islands[bridge->islandIDto]->position;
+	float distance = islandPosFrom.distance(islandPosTo);
+	bridge->length = distance;
+	float antsNeeded = ceil(distance * antsNeededPerBridgeSizeValue);
+	bridge->antsNeeded = antsNeeded;
 }
 
-float currentBridgeLength(Bridge* bridge)
+float bridgeProgressPercentage(Bridge* bridge)
 {
-	float percentage = calcAntsNeededForBridge(bridge->length) / bridge->antsGathered;
-	return percentage * bridge->length;
+	float percentage = bridge->antsGathered / bridge->antsNeeded;
+	return Kore::min(percentage,1.0f);
 }
