@@ -91,7 +91,8 @@ const float kse = 30;
 const vec3 light = normalize (vec3 (2, 1, 3));
 
 void main() {
-	vec3 normal = calcNormal(newpos.x, newpos.y);
+	vec3 normal = (vtransformation * vec4(calcNormal(newpos.x, newpos.y), 0.0)).xyz;
+	//calcNormal(newpos.x, newpos.y);
 	vec3 view    = normalize (- vec3 (vtransformation * world)); 
 	vec3 halfway      = normalize (view + light);
 
