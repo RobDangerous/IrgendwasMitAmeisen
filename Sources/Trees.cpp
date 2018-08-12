@@ -14,7 +14,7 @@
 using namespace Kore;
 using namespace Kore::Graphics4;
 
-const int maxTrees = 3;
+const int maxTrees = 4;
 MeshObject* trees[maxTrees];
 
 namespace {
@@ -47,11 +47,17 @@ Trees::Trees() {
 	trees[0] = new MeshObject("stones/stone01.ogex", "stones/", structureTree, 1.0);
 	trees[0]->M = mat4::Translation(-5, 1, 0) * treeRot.matrix().Transpose() * mat4::Scale(0.1);
 	
-	trees[1] = new MeshObject("grass/grass.ogex", "grass/", structureTree, 1.0);
-	trees[1]->M = mat4::Translation(0, 1, 0) * treeRot.matrix().Transpose();
+	trees[1] = new MeshObject("stones/stone02.ogex", "stones/", structureTree, 1.0);
+	trees[1]->M = mat4::Translation(-4, 1, 0) * treeRot.matrix().Transpose();
 	
-	trees[2] = new MeshObject("trees/tree02.ogex", "trees/", structureTree, 1.0);
-	trees[2]->M = mat4::Translation(0, 1, 0) * treeRot.matrix().Transpose();
+	//trees[2] = new MeshObject("grass/grass.ogex", "grass/", structureTree, 1.0);
+	//trees[2]->M = mat4::Translation(0, 1, 0) * treeRot.matrix().Transpose();
+	
+	trees[2] = new MeshObject("island/island.ogex", "island/", structureTree, 1.0);
+	trees[2]->M = mat4::Translation(-4, 1, 0) * treeRot.matrix().Transpose();
+	
+	trees[3] = new MeshObject("trees/tree02.ogex", "trees/", structureTree, 1.0);
+	trees[3]->M = mat4::Translation(0, 1, 0) * treeRot.matrix().Transpose();
 
 }
 
@@ -63,6 +69,9 @@ void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 		
 		Graphics4::setMatrix(vLocation, viewMatrix);
 		Graphics4::setMatrix(pLocation, projectionMatrix);
+		
+		Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+		Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
 		
 		trees[i]->setLights(lightCount, lightPosLocation);
 		trees[i]->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
