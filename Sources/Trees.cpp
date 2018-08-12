@@ -14,7 +14,7 @@
 using namespace Kore;
 using namespace Kore::Graphics4;
 
-const int maxTrees = 1;
+const int maxTrees = 2;
 MeshObject* trees[maxTrees];
 
 namespace {
@@ -43,7 +43,10 @@ Trees::Trees() {
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	
 	trees[0] = new MeshObject("trees/tree02.ogex", "trees/", structureTree, 1.0);
-	trees[0]->M = mat4::Translation(0, 0, 0) * treeRot.matrix().Transpose();
+	trees[0]->M = mat4::Translation(0, 1, 0) * treeRot.matrix().Transpose();
+	
+	trees[1] = new MeshObject("grass/grass.ogex", "grass/", structureTree, 1.0);
+	trees[1]->M = mat4::Translation(0, 1, 0) * treeRot.matrix().Transpose();
 }
 
 void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
