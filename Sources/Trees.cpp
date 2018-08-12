@@ -14,11 +14,10 @@
 using namespace Kore;
 using namespace Kore::Graphics4;
 
+const int maxTrees = 2;
+MeshObject* trees[maxTrees];
+
 namespace {
-	
-	MeshObject* meshObject;
-	
-	
 	Kore::Graphics4::VertexStructure structureTree;
 	Kore::Graphics4::Shader* vertexShader;
 	Kore::Graphics4::Shader* fragmentShader;
@@ -40,15 +39,13 @@ Trees::Trees() {
 
 	loadShader();
 	
-	meshObject = new MeshObject("Tree02/tree02.ogex", "Tree02/", structureTree, 1.0);
-	
-	////tree2 = new Baum("tree_stump/pine_tree.ogex", "tree_stump/");
-	
-	
 	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
-	treeRot.rotate(Kore::Quaternion(vec3(0, 0, 1), Kore::pi / 2.0));
-	meshObject->M = mat4::Translation(0, 0, 0) * treeRot.matrix().Transpose();
+	
+	trees[0] = new MeshObject("trees/tree01.ogex", "trees/", structureTree, 1.0);
+	trees[0]->M = mat4::Translation(-3, 0, 0) * treeRot.matrix().Transpose();
+	trees[1] = new MeshObject("trees/tree02.ogex", "trees/", structureTree, 1.0);
+	trees[1]->M = mat4::Translation(0, 0, 0) * treeRot.matrix().Transpose();
 }
 
 void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
@@ -58,8 +55,10 @@ void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	Graphics4::setMatrix(vLocation, viewMatrix);
 	Graphics4::setMatrix(pLocation, projectionMatrix);
 	
-	meshObject->setLights(lightCount, lightPosLocation);
-	meshObject->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
+	for (int i = 0; i < maxTrees; ++i) {
+		trees[i]->setLights(lightCount, lightPosLocation);
+		trees[i]->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
+	}
 }
 
 void Trees::loadShader() {
