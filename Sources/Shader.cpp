@@ -26,6 +26,9 @@ namespace {
 	double startTime;
 	double lastTime;
 	
+	const float CAMERA_NEAR_PLANE = 0.01f;
+	const float CAMERA_FAR_PLANE = 1000;
+
 	const float CAMERA_ROTATION_SPEED = 0.05f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
@@ -112,7 +115,7 @@ namespace {
 	vec3 cameraPos = vec3(0, 0, 0);
 	
 	Kore::mat4 getProjectionMatrix() {
-		mat4 P = mat4::Perspective(45, (float)width / (float)height, 0.01f, 1000);
+		mat4 P = mat4::Perspective(45, (float)width / (float)height, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 		P.Set(0, 0, -P.get(0, 0));
 		return P;
 	}
@@ -194,7 +197,7 @@ namespace {
 
 			vec3 diff = islandToPosition - islandFromPosition;
 			
-			vec3 position = islandFromPosition + (diff * 0.5f);
+			vec3 position = islandFromPosition;
 			
 			
 			Kore::Quaternion rotation = Kore::Quaternion(0, 0, 0, 1);
@@ -204,7 +207,11 @@ namespace {
 			
 			rotation.rotate(Kore::Quaternion(vec3(0, 0, 1), alpha));
 
-			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y(), position.z()) * rotation.matrix().Transpose());
+			
+
+			mat4 scale = mat4::Scale(1.0f, -bridgeProgressPercentage(logicBridge) * diff.getLength(), 1.0f);
+
+			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y()+0.25f, position.z()) * rotation.matrix().Transpose() * scale);
 			bridge->render(tex);
 		}
 
@@ -287,6 +294,22 @@ void keyUp(KeyCode code) {
 	}
 }
 
+vec3 screenToWorldSpace(float posX, float posY)
+{
+	float xClip = (posX / width - 0.5f);
+	float yClip = (posY / height - 0.5f);
+	
+	mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
+
+	vec4 positionClip(xClip, yClip, CAMERA_NEAR_PLANE, 1.0f);
+	vec4 positionWorld = inverseProView * positionClip;
+	positionWorld.x() /= positionWorld.w();
+	positionWorld.y() /= positionWorld.w();
+	positionWorld.z() /= positionWorld.w();
+
+	return positionWorld.xyz();
+}
+
 void loadShader() {
 	FileReader vs("shader.vert");
 	FileReader fs("shader.frag");
@@ -323,8 +346,8 @@ void loadShader() {
 void setUpGameLogic()
 {
 	storage = new Storage();
-	int id0 = createIsland(storage, vec3(2, 0.75f, 2), 1, 100);
-	int id1 = createIsland(storage, vec3(4, 0.75f, 4), 1, 100);
+	int id0 = createIsland(storage, vec3(2, 1.0f, 2), 1, 100);
+	int id1 = createIsland(storage, vec3(4, 1.0f, 4), 1, 100);
 	storage->islands[id0]->antsOnIsland = 50;
 	createBridge(storage, id0, id1);
 }

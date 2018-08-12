@@ -24,8 +24,9 @@ struct Bridge
 	int islandIDfrom;
 	int islandIDto;
 	
-	float length;
+	float antsNeeded;
 	float antsGathered;
+	float length;
 
 	int completedSinceSeconds;
 };
