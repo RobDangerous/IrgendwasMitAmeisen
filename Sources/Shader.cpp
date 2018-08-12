@@ -191,9 +191,19 @@ namespace {
 			vec3 islandFromPosition = storage->islands[logicBridge->islandIDfrom]->position;
 			vec3 islandToPosition = storage->islands[logicBridge->islandIDto]->position;
 
-			vec3 position = islandFromPosition + ((islandToPosition - islandFromPosition) * 0.5f);
+			vec3 diff = islandToPosition - islandFromPosition;
+			
+			vec3 position = islandFromPosition + (diff * 0.5f);
+			
+			
+			Kore::Quaternion rotation = Kore::Quaternion(0, 0, 0, 1);
+			rotation.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+			
+			float alpha = Kore::atan2(diff.x(), diff.z());
+			
+			rotation.rotate(Kore::Quaternion(vec3(0, 0, 1), alpha));
 
-			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y(), position.z()));
+			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y(), position.z()) * rotation.matrix().Transpose());
 			bridge->render(tex);
 		}
 

@@ -653,6 +653,8 @@ Light* MeshObject::ConvertLightNode(const OGEX::LightNodeStructure& structure) {
 }
 
 void MeshObject::setTransformation(Graphics4::ConstantLocation mLocation, mat4 transformationMat) {
+	M = transformationMat;
+	
 	for (int i = 0; i < meshesCount; ++i) {
 		Geometry* geometry = geometries[i];
 		mat4 modelMatrix = transformationMat * geometry->transform;
