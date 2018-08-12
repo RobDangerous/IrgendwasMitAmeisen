@@ -28,9 +28,12 @@ namespace {
 	const float SEA_FREQ = 0.16f;
 	const float SEA_HEIGHT = 0.6f;
 	mat2 octave_m;
+	double timeOffset;
 }
 
 void initWater() {
+	timeOffset = System::time();
+
 	octave_m.Set(0, 0, 1.6f);
 	octave_m.Set(0, 1, 1.2f);
 	octave_m.Set(1, 0, -1.2f);
@@ -93,7 +96,12 @@ void initWater() {
 
 void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
 	Graphics4::setPipeline(pipeline);
-	Graphics4::setFloat(timeLocation, (float)System::time());
+	double t = System::time() - timeOffset;
+	if (t > 60 * 10) {
+		timeOffset += 60 * 10;
+		t -= 60 * 10;
+	}
+	Graphics4::setFloat(timeLocation, (float)t);
 	Graphics4::setFloat(zoffsetLocation, zposition - 5.0f);
 	Graphics4::setMatrix(matrixLocation, matrix);
 	Graphics4::setMatrix(vmatrixLocation, vmatrix);
