@@ -2,9 +2,9 @@
 
 #include <Kore/Math/Matrix.h>
 
-class Baum {
+class Trees {
 public:
-	Baum(const char* meshFile, const char* texturePath, float scale = 1.0);
+	Trees();
 	
 	void render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix);
 	

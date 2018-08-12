@@ -9,7 +9,7 @@
 #include <Kore/Input/Keyboard.h>
 #include <Kore/Log.h>
 
-#include "Baum.h"
+#include "Trees.h"
 #include "Water.h"
 #include "MeshObject.h"
 #include "GameObjects.h"
@@ -93,8 +93,7 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
-	Baum* tree;
-	Baum* tree2;
+	Trees* trees;
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
@@ -171,7 +170,7 @@ namespace {
 		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
-			tree->render(P, V);
+			trees->render(P, V);
 			//tree2->render(P, V);
 		}
 		
@@ -331,8 +330,7 @@ int kore(int argc, char** argv) {
 	Keyboard::the()->KeyUp = keyUp;
 
 
-	tree = new Baum("Tree02/tree02.ogex", "Tree02/");
-	//tree2 = new Baum("tree_stump/pine_tree.ogex", "tree_stump/");
+	trees = new Trees();
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);

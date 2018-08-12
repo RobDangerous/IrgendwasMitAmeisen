@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Baum.h"
+#include "Trees.h"
 
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
@@ -36,11 +36,14 @@ namespace {
 	Kore::Graphics4::ConstantLocation lightCount;
 }
 
-Baum::Baum(const char* meshFile, const char* texturePath, float scale) {
+Trees::Trees() {
 
 	loadShader();
 	
-	meshObject = new MeshObject(meshFile, texturePath, structureTree, scale);
+	meshObject = new MeshObject("Tree02/tree02.ogex", "Tree02/", structureTree, 1.0);
+	
+	////tree2 = new Baum("tree_stump/pine_tree.ogex", "tree_stump/");
+	
 	
 	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
@@ -48,7 +51,7 @@ Baum::Baum(const char* meshFile, const char* texturePath, float scale) {
 	meshObject->M = mat4::Translation(0, 0, 0) * treeRot.matrix().Transpose();
 }
 
-void Baum::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
+void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 
 	Graphics4::setPipeline(pipeline);
 	
@@ -59,7 +62,7 @@ void Baum::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	meshObject->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
 }
 
-void Baum::loadShader() {
+void Trees::loadShader() {
 	FileReader vs("shader_tree.vert");
 	FileReader fs("shader_tree.frag");
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
