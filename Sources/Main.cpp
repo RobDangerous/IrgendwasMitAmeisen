@@ -29,8 +29,8 @@ namespace {
 	
 	const float CAMERA_NEAR_PLANE = 0.01f;
 	const float CAMERA_FAR_PLANE = 1000;
-
-	const float CAMERA_ROTATION_SPEED = 0.01f;
+	
+	const float CAMERA_ROTATION_SPEED = 0.5f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
 	// Simple shader
@@ -113,6 +113,7 @@ namespace {
 	float horizontalAngle = -1.24f * pi;
 	float verticalAngle = -0.5f;
 	
+	Kore::Quaternion cameraRotation = Kore::Quaternion(0, 0, 0, 1);
 	vec3 cameraPos = vec3(0, 0, 0);
 	
 	Kore::mat4 getProjectionMatrix() {
@@ -144,7 +145,6 @@ namespace {
 		cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
 		
-		log(Info, "%f %f", horizontalAngle, verticalAngle);
 		forward = cameraUp.cross(right);  // cross product
 		
 		// Move position of camera based on WASD keys
@@ -160,7 +160,6 @@ namespace {
 		if (D || R) {
 			cameraPos += right * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
-		
 		
 		Graphics4::begin();
 		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag, Kore::Graphics1::Color::Green, 1.0f, 0);
@@ -301,10 +300,10 @@ namespace {
 		double t = System::time() - startTime;
 		double deltaT = t - lastMouseTime;
 		lastMouseTime = t;
+		if (deltaT > 1.0f / 30.0f) return;
 		
-		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT * 7.0f;
-		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT * 7.0f;
-		//verticalAngle = Kore::min(Kore::max(verticalAngle, -0.49f * pi), 0.49f * pi);
+		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT;
+		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT;
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
@@ -313,22 +312,6 @@ namespace {
 	
 	void mouseRelease(int windowId, int button, int x, int y) {
 		rotate = false;
-	}
-	
-	vec3 screenToWorldSpace(float posX, float posY)
-	{
-		float xClip = (posX / width - 0.5f);
-		float yClip = (posY / height - 0.5f);
-		
-		mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
-		
-		vec4 positionClip(xClip, yClip, CAMERA_NEAR_PLANE, 1.0f);
-		vec4 positionWorld = inverseProView * positionClip;
-		positionWorld.x() /= positionWorld.w();
-		positionWorld.y() /= positionWorld.w();
-		positionWorld.z() /= positionWorld.w();
-		
-		return positionWorld.xyz();
 	}
 	
 	void loadShader() {
@@ -391,7 +374,7 @@ int kore(int argc, char** argv) {
 #ifdef NDEBUG
 	Mouse::the()->lock(0);
 #endif
-
+	
 	trees = new Trees();
 	
 	loadShader();
