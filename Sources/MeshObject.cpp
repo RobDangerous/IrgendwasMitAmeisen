@@ -129,7 +129,7 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 	
 	LoadObj(meshFile);
 	
-	//Texture* image = new Texture("redDot.png", true);
+	alpha = false;
 	
 	meshesCount = meshes.size();
 	log(Info, "Meshes length %i, geometry length %i, material length %i", meshesCount, geometries.size(), materials.size());
@@ -155,6 +155,11 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 			std::strcat(temp, material->textureName);
 			log(Info, "Load Texture %s", temp);
 			images[j] = new Texture(temp);
+			
+			if (strncmp (material->textureName, "trees/", 5) == 0) {
+				alpha = true;
+			}
+			
 		} else {
 			//log(Info, "Load Texture white");
 			Texture* whiteTex = new Graphics4::Texture("white.png", true);
@@ -198,6 +203,7 @@ void MeshObject::render(TextureUnit tex, Kore::Graphics4::ConstantLocation mLoca
 		
 		unsigned int materialIndex = geometry->materialIndex;
 		Material* material = findMaterialWithIndex(materialIndex);
+		
 		if (material != nullptr) {
 			Graphics4::setFloat3(diffuseLocation, material->diffuse);
 			Graphics4::setFloat3(specularLocation, material->specular);
@@ -433,7 +439,7 @@ Geometry* MeshObject::ConvertGeometryNode(const OGEX::GeometryNodeStructure& str
 	Geometry* geometry = new Geometry();
 	
 	geometry->name = structure.GetNodeName();
-	//log(Info, "Geometry name %s", name);
+	//log(Info, "Geometry name %s", geometry->name);
 	
 	const Structure *subStructure = structure.GetFirstSubnode();
 	while (subStructure) {
