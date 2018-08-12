@@ -86,8 +86,6 @@ namespace {
 		pipeline_living_room->compile();
 
 		tex_living_room = pipeline_living_room->getTextureUnit("tex");
-		Graphics4::setTextureAddressing(tex_living_room, Graphics4::U, Graphics4::Repeat);
-		Graphics4::setTextureAddressing(tex_living_room, Graphics4::V, Graphics4::Repeat);
 
 		pLocation_living_room = pipeline_living_room->getConstantLocation("P");
 		vLocation_living_room = pipeline_living_room->getConstantLocation("V");
