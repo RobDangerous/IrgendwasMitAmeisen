@@ -180,22 +180,20 @@ namespace {
 		
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
-			mat4 tempM = planet->M;
 			vec3& islandPosition = storage->islands[i]->position;
-			planet->setTranslation(mLocation, tempM * mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
 			planet->render(tex);
 		}
 		
 		//render bridges
 		for (int i = 0; i < storage->nextBridge; ++i) {
-			mat4 tempM = bridge->M;
 			Bridge* logicBridge = storage->bridges[i];
 			vec3 islandFromPosition = storage->islands[logicBridge->islandIDfrom]->position;
 			vec3 islandToPosition = storage->islands[logicBridge->islandIDto]->position;
 
 			vec3 position = islandFromPosition + ((islandToPosition - islandFromPosition) * 0.5f);
 
-			bridge->setTranslation(mLocation, tempM * mat4::Translation(position.x(), position.y(), position.z()));
+			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y(), position.z()));
 			bridge->render(tex);
 		}
 
