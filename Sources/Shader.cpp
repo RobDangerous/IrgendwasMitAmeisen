@@ -7,6 +7,7 @@
 #include <Kore/Graphics4/Shader.h>
 #include <Kore/System.h>
 #include <Kore/Input/Keyboard.h>
+#include <Kore/Input/Mouse.h>
 #include <Kore/Log.h>
 
 #include "Trees.h"
@@ -29,7 +30,7 @@ namespace {
 	const float CAMERA_NEAR_PLANE = 0.01f;
 	const float CAMERA_FAR_PLANE = 1000;
 
-	const float CAMERA_ROTATION_SPEED = 0.05f;
+	const float CAMERA_ROTATION_SPEED = 0.01f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
 	// Simple shader
@@ -142,6 +143,8 @@ namespace {
 
 		cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
+		
+		log(Info, "%f %f", horizontalAngle, verticalAngle);
 		forward = cameraUp.cross(right);  // cross product
 		
 		// Move position of camera based on WASD keys
@@ -218,139 +221,160 @@ namespace {
 		Graphics4::end();
 		Graphics4::swapBuffers();
 	}
-}
 
-void keyDown(KeyCode code) {
-	switch (code) {
-		case Kore::KeyW:
-			W = true;
-			break;
-		case Kore::KeyA:
-			A = true;
-			break;
-		case Kore::KeyS:
-			S = true;
-			break;
-		case Kore::KeyD:
-			D = true;
-			break;
-		case Kore::KeyLeft:
-			L = true;
-			break;
-		case Kore::KeyRight:
-			R = true;
-			break;
-		case Kore::KeyUp:
-			F = true;
-			break;
-		case Kore::KeyDown:
-			B = true;
-			break;
-		case Kore::KeySpace:
-			break;
-		case Kore::KeyR:
-			break;
-		case KeyL:
-			Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
-			Kore::log(Kore::LogLevel::Info, "Rotation: (%f, %f)", verticalAngle, horizontalAngle);
-			break;
-		case Kore::KeyEscape:
-		case KeyQ:
-			System::stop();
-			break;
-		default:
-			break;
+	void keyDown(KeyCode code) {
+		switch (code) {
+			case Kore::KeyW:
+				W = true;
+				break;
+			case Kore::KeyA:
+				A = true;
+				break;
+			case Kore::KeyS:
+				S = true;
+				break;
+			case Kore::KeyD:
+				D = true;
+				break;
+			case Kore::KeyLeft:
+				L = true;
+				break;
+			case Kore::KeyRight:
+				R = true;
+				break;
+			case Kore::KeyUp:
+				F = true;
+				break;
+			case Kore::KeyDown:
+				B = true;
+				break;
+			case Kore::KeySpace:
+				break;
+			case Kore::KeyR:
+				break;
+			case KeyL:
+				Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
+				Kore::log(Kore::LogLevel::Info, "Rotation: (%f, %f)", verticalAngle, horizontalAngle);
+				break;
+			case Kore::KeyEscape:
+			case KeyQ:
+				System::stop();
+				break;
+			default:
+				break;
+		}
 	}
-}
-
-void keyUp(KeyCode code) {
-	switch (code) {
-		case Kore::KeyW:
-			W = false;
-			break;
-		case Kore::KeyA:
-			A = false;
-			break;
-		case Kore::KeyS:
-			S = false;
-			break;
-		case Kore::KeyD:
-			D = false;
-			break;
-		case Kore::KeyLeft:
-			L = false;
-			break;
-		case Kore::KeyRight:
-			R = false;
-			break;
-		case Kore::KeyUp:
-			F = false;
-			break;
-		case Kore::KeyDown:
-			B = false;
-			break;
-		default:
-			break;
+	
+	void keyUp(KeyCode code) {
+		switch (code) {
+			case Kore::KeyW:
+				W = false;
+				break;
+			case Kore::KeyA:
+				A = false;
+				break;
+			case Kore::KeyS:
+				S = false;
+				break;
+			case Kore::KeyD:
+				D = false;
+				break;
+			case Kore::KeyLeft:
+				L = false;
+				break;
+			case Kore::KeyRight:
+				R = false;
+				break;
+			case Kore::KeyUp:
+				F = false;
+				break;
+			case Kore::KeyDown:
+				B = false;
+				break;
+			default:
+				break;
+		}
 	}
+	
+	double lastMouseTime = 0;
+	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
+		double t = System::time() - startTime;
+		double deltaT = t - lastMouseTime;
+		lastMouseTime = t;
+		
+		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT * 7.0f;
+		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT * 7.0f;
+		verticalAngle = Kore::min(Kore::max(verticalAngle, -0.49f * pi), 0.49f * pi);
+	}
+	
+	void mousePress(int windowId, int button, int x, int y) {
+		rotate = true;
+	}
+	
+	void mouseRelease(int windowId, int button, int x, int y) {
+		rotate = false;
+	}
+	
+	vec3 screenToWorldSpace(float posX, float posY)
+	{
+		float xClip = (posX / width - 0.5f);
+		float yClip = (posY / height - 0.5f);
+		
+		mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
+		
+		vec4 positionClip(xClip, yClip, CAMERA_NEAR_PLANE, 1.0f);
+		vec4 positionWorld = inverseProView * positionClip;
+		positionWorld.x() /= positionWorld.w();
+		positionWorld.y() /= positionWorld.w();
+		positionWorld.z() /= positionWorld.w();
+		
+		return positionWorld.xyz();
+	}
+	
+	void loadShader() {
+		FileReader vs("shader.vert");
+		FileReader fs("shader.frag");
+		vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
+		fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
+		
+		// This defines the structure of your Vertex Buffer
+		structure.add("pos", Graphics4::Float3VertexData);
+		structure.add("tex", Graphics4::Float2VertexData);
+		structure.add("nor", Graphics4::Float3VertexData);
+		
+		pipeline = new Graphics4::PipelineState();
+		pipeline->inputLayout[0] = &structure;
+		pipeline->inputLayout[1] = nullptr;
+		pipeline->vertexShader = vertexShader;
+		pipeline->fragmentShader = fragmentShader;
+		pipeline->depthMode = Graphics4::ZCompareLess;
+		pipeline->depthWrite = true;
+		pipeline->blendSource = Graphics4::SourceAlpha;
+		pipeline->blendDestination = Graphics4::InverseSourceAlpha;
+		pipeline->alphaBlendSource = Graphics4::SourceAlpha;
+		pipeline->alphaBlendDestination = Graphics4::InverseSourceAlpha;
+		pipeline->compile();
+		
+		tex = pipeline->getTextureUnit("tex");
+		Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+		Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
+		
+		pLocation = pipeline->getConstantLocation("P");
+		vLocation = pipeline->getConstantLocation("V");
+		mLocation = pipeline->getConstantLocation("M");
+	}
+	
+	void setUpGameLogic()
+	{
+		storage = new Storage();
+		int id0 = createIsland(storage, vec3(2, 1.0f, 2), 1, 100);
+		int id1 = createIsland(storage, vec3(4, 1.0f, 4), 1, 100);
+		storage->islands[id0]->antsOnIsland = 50;
+		createBridge(storage, id0, id1);
+	}
+
 }
 
-vec3 screenToWorldSpace(float posX, float posY)
-{
-	float xClip = (posX / width - 0.5f);
-	float yClip = (posY / height - 0.5f);
-	
-	mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
-
-	vec4 positionClip(xClip, yClip, CAMERA_NEAR_PLANE, 1.0f);
-	vec4 positionWorld = inverseProView * positionClip;
-	positionWorld.x() /= positionWorld.w();
-	positionWorld.y() /= positionWorld.w();
-	positionWorld.z() /= positionWorld.w();
-
-	return positionWorld.xyz();
-}
-
-void loadShader() {
-	FileReader vs("shader.vert");
-	FileReader fs("shader.frag");
-	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
-	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
-	
-	// This defines the structure of your Vertex Buffer
-	structure.add("pos", Graphics4::Float3VertexData);
-	structure.add("tex", Graphics4::Float2VertexData);
-	structure.add("nor", Graphics4::Float3VertexData);
-	
-	pipeline = new Graphics4::PipelineState();
-	pipeline->inputLayout[0] = &structure;
-	pipeline->inputLayout[1] = nullptr;
-	pipeline->vertexShader = vertexShader;
-	pipeline->fragmentShader = fragmentShader;
-	pipeline->depthMode = Graphics4::ZCompareLess;
-	pipeline->depthWrite = true;
-	pipeline->blendSource = Graphics4::SourceAlpha;
-	pipeline->blendDestination = Graphics4::InverseSourceAlpha;
-	pipeline->alphaBlendSource = Graphics4::SourceAlpha;
-	pipeline->alphaBlendDestination = Graphics4::InverseSourceAlpha;
-	pipeline->compile();
-	
-	tex = pipeline->getTextureUnit("tex");
-	Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
-	Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
-	
-	pLocation = pipeline->getConstantLocation("P");
-	vLocation = pipeline->getConstantLocation("V");
-	mLocation = pipeline->getConstantLocation("M");
-}
-
-void setUpGameLogic()
-{
-	storage = new Storage();
-	int id0 = createIsland(storage, vec3(2, 1.0f, 2), 1, 100);
-	int id1 = createIsland(storage, vec3(4, 1.0f, 4), 1, 100);
-	storage->islands[id0]->antsOnIsland = 50;
-	createBridge(storage, id0, id1);
-}
 
 int kore(int argc, char** argv) {
 	Kore::System::init("Shader", width, height);
@@ -360,6 +384,13 @@ int kore(int argc, char** argv) {
 	
 	Keyboard::the()->KeyDown = keyDown;
 	Keyboard::the()->KeyUp = keyUp;
+	Mouse::the()->Move = mouseMove;
+	Mouse::the()->Press = mousePress;
+	Mouse::the()->Release = mouseRelease;
+	
+#ifdef NDEBUG
+	Mouse::the()->lock(0);
+#endif
 
 	trees = new Trees();
 	
