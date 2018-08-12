@@ -304,7 +304,7 @@ namespace {
 		
 		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT * 7.0f;
 		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT * 7.0f;
-		verticalAngle = Kore::min(Kore::max(verticalAngle, -0.49f * pi), 0.49f * pi);
+		//verticalAngle = Kore::min(Kore::max(verticalAngle, -0.49f * pi), 0.49f * pi);
 	}
 	
 	void mousePress(int windowId, int button, int x, int y) {
