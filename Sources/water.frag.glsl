@@ -82,16 +82,17 @@ vec3 calcNormal(float x, float z) {
     return normalize(vec3(map(x - eps, z) - map(x + eps, z), 2.0 * eps, map(x, z - eps) - map(x, z + eps)));
 }
 
-const vec4 Ca = vec4 ( 0,  0, .3, 0);
+const vec4 Ca = vec4 (.1, .1, .3, 0);
 const vec4 Ce = vec4 ( 0,  0,  0, 0);
-const vec4 Cd = vec4 ( 0, .5,  0, 0);
-const vec4 Cs = vec4 (.8, .8, .8, 0);
+const vec4 Cd = vec4 ( 0,  0, .6, 0);
+const vec4 Cs = vec4 (.9, .9, .9, 0);
 const float kse = 30;
 
 const vec3 light = normalize (vec3 (2, 1, 3));
 
 void main() {
-	vec3 normal = calcNormal(newpos.x, newpos.y);
+	vec3 normal = (vtransformation * vec4(calcNormal(newpos.x, newpos.y), 0.0)).xyz;
+	//calcNormal(newpos.x, newpos.y);
 	vec3 view    = normalize (- vec3 (vtransformation * world)); 
 	vec3 halfway      = normalize (view + light);
 
