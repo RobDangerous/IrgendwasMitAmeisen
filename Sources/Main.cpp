@@ -58,9 +58,6 @@ namespace {
 	Graphics4::ConstantLocation lightPosLocation_living_room;
 	Graphics4::ConstantLocation lightCount_living_room;
 	
-	bool renderTrees = true;
-
-
 	void loadLivingRoomShader() {
 		FileReader vs("shader_living_room.vert");
 		FileReader fs("shader_living_room.frag");
@@ -98,7 +95,9 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
-	Island* islands;
+	const int maxIslands = 1;
+	Island* islands[maxIslands];
+	
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
@@ -196,8 +195,8 @@ namespace {
 		Graphics4::setMatrix(pLocation_living_room, P);
 		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
-		if (renderTrees) {
-			islands->render(P, V);
+		for(int i = 0; i < maxIslands; ++i) {
+			islands[i]->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
@@ -417,7 +416,8 @@ int kore(int argc, char** argv) {
 	Mouse::the()->lock(0);
 #endif
 
-	islands = new Island();
+	islands[0] = new Island("island/island.ogex", "island/");
+	//islands[1] = new Island("island/island1.ogex", "island/");
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
