@@ -9,7 +9,7 @@
 #include <Kore/Input/Keyboard.h>
 #include <Kore/Log.h>
 
-#include "Baum.h"
+#include "Trees.h"
 #include "Water.h"
 #include "MeshObject.h"
 #include "GameObjects.h"
@@ -93,8 +93,7 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
-	Baum* tree;
-	Baum* tree2;
+	Trees* trees;
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
@@ -172,32 +171,40 @@ namespace {
 		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
-			tree->render(P, V);
-			//tree2->render(P, V);
+			trees->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
 
+		
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
-			mat4 tempM = planet->M;
 			vec3& islandPosition = storage->islands[i]->position;
-			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
 			planet->render(tex);
 		}
 		
 		//render bridges
 		for (int i = 0; i < storage->nextBridge; ++i) {
-			mat4 tempM = bridge->M;
 			Bridge* logicBridge = storage->bridges[i];
 			vec3 islandFromPosition = storage->islands[logicBridge->islandIDfrom]->position;
 			vec3 islandToPosition = storage->islands[logicBridge->islandIDto]->position;
 
-			vec3 position = islandFromPosition + ((islandToPosition - islandFromPosition) * 0.5f);
+			vec3 diff = islandToPosition - islandFromPosition;
+			
+			vec3 position = islandFromPosition + (diff * 0.5f);
+			
+			
+			Kore::Quaternion rotation = Kore::Quaternion(0, 0, 0, 1);
+			rotation.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+			
+			float alpha = Kore::atan2(diff.x(), diff.z());
+			
+			rotation.rotate(Kore::Quaternion(vec3(0, 0, 1), alpha));
 
-			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(position.x(), position.y(), position.z()));
+			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y(), position.z()) * rotation.matrix().Transpose());
 			bridge->render(tex);
 		}
 
@@ -331,15 +338,12 @@ int kore(int argc, char** argv) {
 	Keyboard::the()->KeyDown = keyDown;
 	Keyboard::the()->KeyUp = keyUp;
 
-
-	tree = new Baum("Tree02/tree02.ogex", "Tree02/");
-	//tree2 = new Baum("tree_stump/pine_tree.ogex", "tree_stump/");
+	trees = new Trees();
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-	bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
 
 	cameraPos = vec3(-5, 5, 5);
 
