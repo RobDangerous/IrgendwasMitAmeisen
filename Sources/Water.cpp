@@ -15,13 +15,14 @@ using namespace Kore::Graphics4;
 namespace {
 	ConstantLocation matrixLocation;
 	ConstantLocation vmatrixLocation;
+	ConstantLocation camLocation;
 	ConstantLocation timeLocation;
 	ConstantLocation zoffsetLocation;
 	PipelineState* pipeline;
 	VertexBuffer* vertexBuffer;
 	IndexBuffer* indexBuffer;
-	const int xdiv = 100;
-	const int ydiv = 250;
+	const int xdiv = 1000;
+	const int ydiv = 1000;
 	const int ITER_GEOMETRY = 3;
 	const float SEA_CHOPPY = 4.0f;
 	const float SEA_SPEED = 0.8f * 5.0f;
@@ -64,6 +65,7 @@ void initWater() {
 
 	matrixLocation = pipeline->getConstantLocation("transformation");
 	vmatrixLocation = pipeline->getConstantLocation("vtransformation");
+	camLocation = pipeline->getConstantLocation("cam");
 	timeLocation = pipeline->getConstantLocation("time");
 	zoffsetLocation = pipeline->getConstantLocation("zoffset");
 
@@ -73,8 +75,8 @@ void initWater() {
 	float xpos = -1.0;
 	for (int y = 0; y < ydiv; ++y) {
 		for (int x = 0; x < xdiv; ++x) {
-			vertices[y * xdiv * 2 + x * 2 + 0] = (x - (xdiv / 2.0f)) / (xdiv / 2.0f) * 30.0f;
-			vertices[y * xdiv * 2 + x * 2 + 1] = (y - (ydiv / 2.0f)) / (ydiv / 2.0f) * 100.0f;
+			vertices[y * xdiv * 2 + x * 2 + 0] = (x - (xdiv / 2.0f)) / (xdiv / 2.0f) * 1000.0f;
+			vertices[y * xdiv * 2 + x * 2 + 1] = (y - (ydiv / 2.0f)) / (ydiv / 2.0f) * 1000.0f;
 		}
 	}
 	vertexBuffer->unlock();
@@ -94,7 +96,7 @@ void initWater() {
 	indexBuffer->unlock();
 }
 
-void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
+void renderWater(mat4 matrix, mat4 vmatrix, vec3 cam, float zposition) {
 	Graphics4::setPipeline(pipeline);
 	double t = System::time() - timeOffset;
 	if (t > 60 * 10) {
@@ -105,6 +107,7 @@ void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
 	Graphics4::setFloat(zoffsetLocation, zposition - 5.0f);
 	Graphics4::setMatrix(matrixLocation, matrix);
 	Graphics4::setMatrix(vmatrixLocation, vmatrix);
+	Graphics4::setFloat3(camLocation, cam);
 	Graphics4::setIndexBuffer(*indexBuffer);
 	Graphics4::setVertexBuffer(*vertexBuffer);
 	Graphics4::drawIndexedVertices();

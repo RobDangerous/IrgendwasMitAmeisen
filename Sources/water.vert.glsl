@@ -1,7 +1,6 @@
 #version 450
 
 uniform mat4 transformation;
-uniform mat4 vtransformation;
 uniform float time;
 uniform float zoffset;
 
@@ -95,5 +94,4 @@ void main() {
     vec4 pos = vec4(newpos.x, height /*coord.r*/, newpos.y, 1.0);
 	gl_Position = transformation * pos;
     world = pos;
-    //normal = calcNormal(newpos.x, newpos.y); //(vtransformation * vec4(calcNormal(newpos.x, newpos.y), 0.0)).xyz;
 }

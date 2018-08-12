@@ -193,7 +193,7 @@ namespace {
 		mat4 P = getProjectionMatrix();
 		mat4 V = getViewMatrix();
 
-		renderWater(P * V, V, 0.0f);
+		renderWater(P * V, V, cameraPos, 0.0f);
 
 		Graphics4::setPipeline(pipeline_living_room);
 		Ant::setLights(lightCount_living_room, lightPosLocation_living_room);
