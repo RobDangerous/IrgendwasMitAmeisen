@@ -138,6 +138,8 @@ namespace {
 		return V;
 	}
 
+
+
 	void update() {
 		double t = System::time() - startTime;
 		double deltaT = t - lastTime;
@@ -169,7 +171,14 @@ namespace {
 		{
 			vec2i mousePos = System::mousePos();
 			vec3 worldPosition = screenToWorldSpace(mousePos.x(), mousePos.y());
-			Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
+			//Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
+			vec3 rayDir = cameraPos - worldPosition;
+			rayDir.normalize();
+			Island* selected = nullptr;
+			if (selectIsland(storage, cameraPos, rayDir, selected))
+			{
+				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
+			}
 			leftMouseDown = false;
 		}
 		
@@ -318,16 +327,14 @@ void mouseDown(int windowId, int mouseButton, int x, int y)
 
 vec3 screenToWorldSpace(float posX, float posY)
 {
-	float xClip = (posX / width - 0.5f);
-	float yClip = (posY / height - 0.5f);
+	float xClip = 2*(posX / width)- 1.0f;
+	float yClip = 2*(posY / height) - 1.0f;
 	
 	mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
 
-	vec4 positionClip(xClip, yClip, CAMERA_NEAR_PLANE, 1.0f);
+	vec4 positionClip(xClip, yClip, 0, 1.0f);
 	vec4 positionWorld = inverseProView * positionClip;
-	positionWorld.x() /= positionWorld.w();
-	positionWorld.y() /= positionWorld.w();
-	positionWorld.z() /= positionWorld.w();
+	positionWorld /= positionWorld.w();
 
 	return positionWorld.xyz();
 }

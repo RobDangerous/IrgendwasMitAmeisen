@@ -143,3 +143,32 @@ float bridgeProgressPercentage(Bridge* bridge)
 	float percentage = bridge->antsGathered / bridge->antsNeeded;
 	return Kore::min(percentage,1.0f);
 }
+
+// twice stolen from the internetz, guaranteed to work doubly good
+// changed variable names for readability
+// removed useless code
+bool IntersectsWith(Kore::vec3 rayOrigin, Kore::vec3 rayDir, Kore::vec3 spherePos, float sphereRadius) {
+	float t0, t1; // solutions for t if the ray intersects 
+				  // geometric solution
+	Kore::vec3 dirRayToSphere = spherePos - rayOrigin;
+	float projectionDirCircleOnRay = dirRayToSphere * rayDir;
+	// if (tca < 0) return false;
+	float distRaySphereSquared = dirRayToSphere * dirRayToSphere - projectionDirCircleOnRay * projectionDirCircleOnRay; 
+	if (distRaySphereSquared > sphereRadius * sphereRadius) 
+		return false;
+	else return true;
+}
+
+bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Island* & selected)
+{
+	for (int i = 0; i < storage->nextIsland; ++i)
+	{
+		Island* island = storage->islands[i];
+		if (IntersectsWith(rayStart,rayDir,island->position, island->radius))
+		{
+			selected = island;
+			return true;
+		}
+	}
+	return false;
+}
