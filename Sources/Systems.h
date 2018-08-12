@@ -11,3 +11,5 @@ int createIsland(Storage* storage, Kore::vec3 position, float radius, float ress
 int createBridge(Storage* storage, int islandIDfrom, int islandIDto);
 
 void updateGameObjects(Storage* storage, float deltaTime);
+
+float bridgeProgressPercentage(Bridge* bridge);
