@@ -171,13 +171,13 @@ namespace {
 
 		if (renderTrees) {
 			trees->render(P, V);
-			//tree2->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
 
+		
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
 			mat4 tempM = planet->M;
@@ -329,14 +329,12 @@ int kore(int argc, char** argv) {
 	Keyboard::the()->KeyDown = keyDown;
 	Keyboard::the()->KeyUp = keyUp;
 
-
 	trees = new Trees();
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-	//bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
 
 	cameraPos = vec3(-5, 5, 5);
 
