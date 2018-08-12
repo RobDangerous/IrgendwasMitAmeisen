@@ -94,7 +94,7 @@ const vec3 light = normalize (vec3 (2, 1, 3));
 void main() {
 	vec3 normal = (vtransformation * vec4(calcNormal(newpos.x, newpos.y), 0.0)).xyz;
 	//calcNormal(newpos.x, newpos.y);
-	vec3 view    = normalize (world.xyz / world.w - cam); 
+	vec3 view    = normalize (cam - world.xyz / world.w); 
 	vec3 halfway      = normalize (view + light);
 
 	vec3  n  = normalize (normal);
