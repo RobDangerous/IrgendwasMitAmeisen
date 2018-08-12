@@ -15,7 +15,7 @@
 
 using namespace Kore;
 
-int currentAnts = 0;
+int currentAnts = maxAnts;
 Ant ants[maxAnts];
 
 namespace {
@@ -142,11 +142,33 @@ namespace {
 	}
 }
 
-Ant::Ant() : mode(Floor), active(false) {
+Ant::Ant() : mode(Floor), active(true) {
+	position = vec3(0.0f, 1.0f, 0.0f);
 	rotation = mat4::Identity();
 	forward = vec4(0, 0, -1, 0);
 	right = vec4(1, 0, 0, 0);
 	up = vec4(0, 1, 0, 0);
+}
+
+void Ant::updateDirections() {
+	for (int i = 0; i < maxAnts; ++i) {
+		Ant* ant = &ants[i];
+		int value = Random::get(2000);
+		value -= 1000;
+		float z = value / 1000.0f;
+		float x = Random::get(1) == 0 ? 1.0 - Kore::abs(z) : -1.0 + Kore::abs(z);
+		ant->forward = vec4(x, 0, z, 0);
+		ant->forward.normalize();
+		ant->up = vec4(0, 1, 0, 0);
+		vec3 right = vec3(ant->up.x(), ant->up.y(), ant->up.z()).cross(ant->forward.xyz());
+		ant->right = vec4(right.x(), right.y(), right.z(), 0);
+		ant->right.normalize();
+	
+		float angle = Kore::atan2(ant->forward.z(), ant->forward.x());
+		ant->rotation = Quaternion(vec3(ant->up.x(), ant->up.y(), ant->up.z()), angle + pi / 2.0f).matrix();
+
+		ant->forward.setLength(0.5f + Random::get(500) / 1000.0f);
+	}
 }
 
 void Ant::init() {
@@ -460,7 +482,7 @@ void Ant::move(float deltaTime) {
 		vec3 normal;
 		vec3 contact;
 		float depth;
-		if (boxAndPoint(boxes[i], position + (up.xyz() * 0.1f) + (forward.xyz() * 0.004f), normal, contact, depth)) {
+		/*if (boxAndPoint(boxes[i], position + (up.xyz() * 0.1f) + (forward.xyz() * 0.004f), normal, contact, depth)) {
 			mat4 newrotation = Quaternion(up.xyz().cross(normal), pi / -2.0f).matrix();
 			forward = newrotation * forward;
 			up = newrotation * up;
@@ -471,7 +493,7 @@ void Ant::move(float deltaTime) {
 		if (boxAndPoint(boxes[i], position + (up.xyz() * -0.1f), normal, contact, depth)) {
 			flying = false;
 			lastNormal = normal;
-		}
+		}*/
 	}
 	if (flying) {
 		//forward = vec4(0, 0, 0, 0);
