@@ -20,6 +20,7 @@
 
 using namespace Kore;
 
+
 namespace {
 	const int width = 1024;
 	const int height = 768;
@@ -33,6 +34,7 @@ namespace {
 	const float CAMERA_ROTATION_SPEED = 0.5f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
+	vec3 screenToWorldSpace(float posX, float posY);
 	// Simple shader
 	Graphics4::VertexStructure structure;
 	Graphics4::Shader* vertexShader;
@@ -57,6 +59,7 @@ namespace {
 	Graphics4::ConstantLocation lightCount_living_room;
 	
 	bool renderTrees = true;
+
 
 	void loadLivingRoomShader() {
 		FileReader vs("shader_living_room.vert");
@@ -106,7 +109,8 @@ namespace {
 	bool rotate = false;
 	bool W, A, S, D = false;
 	bool F, L, B, R = false;
-	
+	bool leftMouseDown = false;
+
 	vec3 cameraUp;
 	vec3 right;
 	vec3 forward;
@@ -116,6 +120,7 @@ namespace {
 	Kore::Quaternion cameraRotation = Kore::Quaternion(0, 0, 0, 1);
 	vec3 cameraPos = vec3(0, 0, 0);
 	
+
 	Kore::mat4 getProjectionMatrix() {
 		mat4 P = mat4::Perspective(45, (float)width / (float)height, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 		P.Set(0, 0, -P.get(0, 0));
@@ -133,6 +138,8 @@ namespace {
 		mat4 V = mat4::lookAlong(cameraDir, cameraPos, cameraUp);
 		return V;
 	}
+
+
 
 	void update() {
 		double t = System::time() - startTime;
@@ -159,6 +166,22 @@ namespace {
 		}
 		if (D || R) {
 			cameraPos += right * (float)deltaT * CAMERA_MOVE_SPEED;
+		}
+		
+		//mouse 
+		if (leftMouseDown)
+		{
+			vec2i mousePos = System::mousePos();
+			vec3 worldPosition = screenToWorldSpace(mousePos.x(), mousePos.y());
+			//Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
+			vec3 rayDir = cameraPos - worldPosition;
+			rayDir.normalize();
+			Island* selected = nullptr;
+			if (selectIsland(storage, cameraPos, rayDir, selected))
+			{
+				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
+			}
+			leftMouseDown = false;
 		}
 		
 		Graphics4::begin();
@@ -294,7 +317,22 @@ namespace {
 				break;
 		}
 	}
+
+
+	vec3 screenToWorldSpace(float posX, float posY)
+	{
+		float xClip = 2*(posX / width)- 1.0f;
+		float yClip = 2*(posY / height) - 1.0f;
 	
+		mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
+
+		vec4 positionClip(xClip, yClip, 0, 1.0f);
+		vec4 positionWorld = inverseProView * positionClip;
+		positionWorld /= positionWorld.w();
+
+		return positionWorld.xyz();
+	}
+
 	double lastMouseTime = 0;
 	void mouseMove(int windowId, int x, int y, int movementX, int movementY) {
 		double t = System::time() - startTime;
@@ -305,9 +343,15 @@ namespace {
 		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT;
 		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT;
 	}
+
 	
 	void mousePress(int windowId, int button, int x, int y) {
 		rotate = true;
+
+		if (button == 0)
+		{
+			leftMouseDown = true;
+		}
 	}
 	
 	void mouseRelease(int windowId, int button, int x, int y) {
@@ -358,7 +402,6 @@ namespace {
 
 }
 
-
 int kore(int argc, char** argv) {
 	Kore::System::init("Shader", width, height);
 	Kore::System::setCallback(update);
@@ -367,6 +410,7 @@ int kore(int argc, char** argv) {
 	
 	Keyboard::the()->KeyDown = keyDown;
 	Keyboard::the()->KeyUp = keyUp;
+
 	Mouse::the()->Move = mouseMove;
 	Mouse::the()->Press = mousePress;
 	Mouse::the()->Release = mouseRelease;
@@ -374,7 +418,7 @@ int kore(int argc, char** argv) {
 #ifdef NDEBUG
 	Mouse::the()->lock(0);
 #endif
-	
+
 	trees = new Trees();
 	
 	loadShader();

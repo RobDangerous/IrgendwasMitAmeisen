@@ -73,14 +73,14 @@ void updateIsland(Island* island, float deltaTime)
 		{
 			//create ants if ressources are available
 			island->antsOnIsland += antCreationPerSecond * deltaTime;
-			Kore::log(Kore::LogLevel::Info, "Island %i has currently %f ants", island->id, island->antsOnIsland);
+			//Kore::log(Kore::LogLevel::Info, "Island %i has currently %f ants", island->id, island->antsOnIsland);
 			//remove ressources per ant on island
 			island->currentRessources -= floorf(island->antsOnIsland) * ressourceConsumptionPerAntPerSecond * deltaTime;
-			Kore::log(Kore::LogLevel::Info, "Island %i ressources reduced to %f", island->id, island->currentRessources);
+			//Kore::log(Kore::LogLevel::Info, "Island %i ressources reduced to %f", island->id, island->currentRessources);
 		}
 		else
 		{
-			Kore::log(Kore::LogLevel::Info, "Island %i ants are starving", island->id);
+			//Kore::log(Kore::LogLevel::Info, "Island %i ants are starving", island->id);
 			//ants starve
 			island->antsOnIsland -= island->antsOnIsland * antStarvationPerSecond * deltaTime;
 		}
@@ -100,7 +100,7 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 		std::pair<Island*, Island*> islandInhabitantsComparison = getIslandWithMoreAnts(fromIsland, toIsland);
 		islandInhabitantsComparison.first->antsOnIsland -= antsMoved;
 		islandInhabitantsComparison.second->antsOnIsland += antsMoved;
-		Kore::log(Kore::LogLevel::Info, "%f ants moved from island %i to island %i.", antsMoved, islandInhabitantsComparison.first->id, islandInhabitantsComparison.second->id);
+		//Kore::log(Kore::LogLevel::Info, "%f ants moved from island %i to island %i.", antsMoved, islandInhabitantsComparison.first->id, islandInhabitantsComparison.second->id);
 	}
 	else {
 		//update bridge building with ants -> size
@@ -108,9 +108,9 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 		if (fromIsland->antsOnIsland >= antsConsumedForBridge)
 		{
 			bridge->antsGathered += antsConsumedForBridge;
-			Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
+			//Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
 			fromIsland->antsOnIsland -= antsConsumedForBridge;
-			Kore::log(Kore::LogLevel::Info, "Bridge %i build removed %f ants from island %i", bridge->id, antsConsumedForBridge, bridge->islandIDfrom);
+			//Kore::log(Kore::LogLevel::Info, "Bridge %i build removed %f ants from island %i", bridge->id, antsConsumedForBridge, bridge->islandIDfrom);
 		}
 		//else island does not have enough ants	
 	}
@@ -142,4 +142,33 @@ float bridgeProgressPercentage(Bridge* bridge)
 {
 	float percentage = bridge->antsGathered / bridge->antsNeeded;
 	return Kore::min(percentage,1.0f);
+}
+
+// twice stolen from the internetz, guaranteed to work doubly good
+// changed variable names for readability
+// removed useless code
+bool IntersectsWith(Kore::vec3 rayOrigin, Kore::vec3 rayDir, Kore::vec3 spherePos, float sphereRadius) {
+	float t0, t1; // solutions for t if the ray intersects 
+				  // geometric solution
+	Kore::vec3 dirRayToSphere = spherePos - rayOrigin;
+	float projectionDirCircleOnRay = dirRayToSphere * rayDir;
+	// if (tca < 0) return false;
+	float distRaySphereSquared = dirRayToSphere * dirRayToSphere - projectionDirCircleOnRay * projectionDirCircleOnRay; 
+	if (distRaySphereSquared > sphereRadius * sphereRadius) 
+		return false;
+	else return true;
+}
+
+bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Island* & selected)
+{
+	for (int i = 0; i < storage->nextIsland; ++i)
+	{
+		Island* island = storage->islands[i];
+		if (IntersectsWith(rayStart,rayDir,island->position, island->radius))
+		{
+			selected = island;
+			return true;
+		}
+	}
+	return false;
 }
