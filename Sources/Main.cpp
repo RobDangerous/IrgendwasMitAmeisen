@@ -166,10 +166,11 @@ namespace {
 		//mouse 
 		if (leftMouseDown)
 		{
-			vec2i mousePos = System::mousePos();
-			vec3 worldPosition = screenToWorldSpace(mousePos.x(), mousePos.y());
+			/*vec2i mousePos = System::mousePos();
+			vec3 worldPosition = cameraPos;//screenToWorldSpace(mousePos.x(), mousePos.y());
 			Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
-			vec3 rayDir = worldPosition - cameraPos;
+			*/
+			vec3 rayDir = camForward;
 			rayDir.normalize();
 
 			IslandStruct* selected = nullptr;
@@ -325,8 +326,8 @@ namespace {
 
 	vec3 screenToWorldSpace(float posX, float posY)
 	{
-		float xClip = (posX / width) - 0.5f;
-		float yClip = -((posY / height) - 0.5f);
+		float xClip = (2*posX / width) - 1.0f;
+		float yClip = -((2*posY / height) - 1.0f);
 	
 		mat4 inverseProView = getViewMatrix().Invert() * getProjectionMatrix().Invert();
 
