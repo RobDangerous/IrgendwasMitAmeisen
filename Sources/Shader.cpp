@@ -168,10 +168,10 @@ namespace {
 		renderWater(P * V, V, 0.0f);
 
 		Graphics4::setPipeline(pipeline_living_room);
-		//Ant::setLights(lightCount_living_room, lightPosLocation_living_room, livingRoom);
+		Ant::setLights(lightCount_living_room, lightPosLocation_living_room);
 		Graphics4::setMatrix(vLocation_living_room, V);
 		Graphics4::setMatrix(pLocation_living_room, P);
-		//Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
+		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
 			trees->render(P, V);
