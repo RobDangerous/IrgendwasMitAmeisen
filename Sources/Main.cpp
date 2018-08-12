@@ -129,22 +129,9 @@ namespace {
 	}
 	
 	Kore::mat4 getViewMatrix() {
-		// Calculate camera direction
-		/*vec3 cameraDir = vec3(Kore::cos(verticalAngle) * Kore::sin(horizontalAngle), Kore::sin(verticalAngle), Kore::cos(verticalAngle) * Kore::cos(horizontalAngle));
-		
-		// Re-calculate the orthonormal up vector
-		cameraUp = right.cross(forward);  // cross product
-		cameraUp.normalize();
-		
-		mat4 V = mat4::lookAlong(cameraDir, cameraPos, cameraUp);*/
-
-		vec3 up(0.0f, 1.0f, 0.0f);
-		mat4 V = mat4::lookAlong(camForward.xyz(), cameraPos, camUp.xyz());
-
+		mat4 V = mat4::lookAlong(camForward.xyz(), cameraPos, vec3(0.0f, 1.0f, 0.0f));
 		return V;
 	}
-
-
 
 	void update() {
 		double t = System::time() - startTime;
