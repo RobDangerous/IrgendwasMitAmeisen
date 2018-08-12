@@ -143,7 +143,7 @@ namespace {
 		lastTime = t;
 		
 		updateGameObjects(storage, deltaT);
-		//Ant::moveEverybody(deltaT);
+		Ant::moveEverybody(deltaT);
 
 		/*cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
@@ -193,7 +193,7 @@ namespace {
 		Ant::setLights(lightCount_living_room, lightPosLocation_living_room);
 		Graphics4::setMatrix(vLocation_living_room, V);
 		Graphics4::setMatrix(pLocation_living_room, P);
-		//Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
+		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		for(int i = 0; i < maxIslands; ++i) {
 			islands[i]->render(P, V);
