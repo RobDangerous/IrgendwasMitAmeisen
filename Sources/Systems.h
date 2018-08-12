@@ -14,4 +14,4 @@ void updateGameObjects(Storage* storage, float deltaTime);
 
 float bridgeProgressPercentage(Bridge* bridge);
 
-bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Island* & selected);
+bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, IslandStruct* & selected);

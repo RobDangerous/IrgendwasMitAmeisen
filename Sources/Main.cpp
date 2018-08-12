@@ -10,7 +10,7 @@
 #include <Kore/Input/Mouse.h>
 #include <Kore/Log.h>
 
-#include "Trees.h"
+#include "Island.h"
 #include "Water.h"
 #include "MeshObject.h"
 #include "GameObjects.h"
@@ -60,6 +60,7 @@ namespace {
 	
 	bool renderTrees = true;
 
+	Graphics4::Texture* queenTex;
 
 	void loadLivingRoomShader() {
 		FileReader vs("shader_living_room.vert");
@@ -86,8 +87,6 @@ namespace {
 		pipeline_living_room->compile();
 
 		tex_living_room = pipeline_living_room->getTextureUnit("tex");
-		Graphics4::setTextureAddressing(tex_living_room, Graphics4::U, Graphics4::Repeat);
-		Graphics4::setTextureAddressing(tex_living_room, Graphics4::V, Graphics4::Repeat);
 
 		pLocation_living_room = pipeline_living_room->getConstantLocation("P");
 		vLocation_living_room = pipeline_living_room->getConstantLocation("V");
@@ -100,7 +99,7 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
-	Trees* trees;
+	Island* islands;
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
@@ -174,8 +173,9 @@ namespace {
 			Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
 			vec3 rayDir = worldPosition - cameraPos;
 			rayDir.normalize();
-			Island* selected = nullptr;
-			if (selectIsland(storage, worldPosition, rayDir, selected))
+
+			IslandStruct* selected = nullptr;
+			if (selectIsland(storage, cameraPos, rayDir, selected))
 			{
 				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
 			}
@@ -197,7 +197,7 @@ namespace {
 		//Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
-			trees->render(P, V);
+			islands->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
@@ -211,7 +211,17 @@ namespace {
 			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
 			planet->render(tex);
 		}
-		
+
+		//render queen
+		AntQueen* antqueen = storage->antQueen;
+		planet->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * mat4::Scale(antqueen->radius).Transpose());
+		Graphics4::setTexture(tex, queenTex);
+
+		Graphics4::setVertexBuffer(*planet->vertexBuffers[0]);
+		Graphics4::setIndexBuffer(*planet->indexBuffers[0]);
+		Graphics4::drawIndexedVertices();
+		planet->render(tex);
+
 		//render bridges
 		for (int i = 0; i < storage->nextBridge; ++i) {
 			Bridge* logicBridge = storage->bridges[i];
@@ -393,8 +403,11 @@ namespace {
 	void setUpGameLogic()
 	{
 		storage = new Storage();
-		int id0 = createIsland(storage, vec3(2, 1.0f, 2), 1, 100);
-		int id1 = createIsland(storage, vec3(4, 1.0f, 4), 1, 100);
+		int id0 = createIsland(storage, vec3(2.0f, 1.0f, 2.0f), 1, 100);
+		int id1 = createIsland(storage, vec3(4.0f, 1.0f, 4.0f), 1, 100);
+		AntQueen* antqueen = storage->antQueen;
+		antqueen->position = vec3(2.0f, 2.5f, 2.0f);
+		antqueen->radius = 0.5f;
 		storage->islands[id0]->antsOnIsland = 50;
 		createBridge(storage, id0, id1);
 	}
@@ -418,13 +431,13 @@ int kore(int argc, char** argv) {
 	Mouse::the()->lock(0);
 #endif
 
-	trees = new Trees();
+	islands = new Island();
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-
+	queenTex = new Graphics4::Texture("antQueen.png");
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();
