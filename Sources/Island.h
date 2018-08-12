@@ -4,7 +4,7 @@
 
 class Island {
 public:
-	Island(const char* meshFile, const char* texturePath);
+	Island();
 	
 	void render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix);
 	

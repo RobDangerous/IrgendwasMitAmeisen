@@ -15,7 +15,8 @@ using namespace Kore;
 using namespace Kore::Graphics4;
 
 namespace {
-	MeshObject* island;
+	const int maxIslands = 2;
+	MeshObject* islands[maxIslands];
 	
 	Kore::Graphics4::VertexStructure structureTree;
 	Kore::Graphics4::Shader* vertexShader;
@@ -35,7 +36,7 @@ namespace {
 	Kore::Graphics4::ConstantLocation lightCount;
 }
 
-Island::Island(const char* meshFile, const char* texturePath) {
+Island::Island() {
 
 	loadShaderWithAlpha();
 	loadShaderWithoutAlpha();
@@ -43,8 +44,11 @@ Island::Island(const char* meshFile, const char* texturePath) {
 	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	
-	island = new MeshObject(meshFile, texturePath, structureTree, 1.0);
-	island->M = mat4::Translation(-4, 0.6, 0) * treeRot.matrix().Transpose();
+	islands[0] = new MeshObject("island/island.ogex", "island/", structureTree, 1.0);
+	islands[0]->M = mat4::Translation(0, 0.6, 0) * treeRot.matrix().Transpose();
+	
+	islands[1] = new MeshObject("island/island1.ogex", "island/", structureTree, 1.0);
+	islands[1]->M = mat4::Translation(15, 0.6, 15) * treeRot.matrix().Transpose();
 }
 
 void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
@@ -53,11 +57,13 @@ void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	Graphics4::setMatrix(vLocation, viewMatrix);
 	Graphics4::setMatrix(pLocation, projectionMatrix);
 
-	Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
-	Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
-	
-	island->setLights(lightCount, lightPosLocation);
-	island->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
+	for (int i = 0; i < maxIslands; ++i) {
+		Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+		Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
+		
+		islands[i]->setLights(lightCount, lightPosLocation);
+		islands[i]->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
+	}
 }
 
 void Island::loadShaderWithAlpha() {
