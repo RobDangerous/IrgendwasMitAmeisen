@@ -31,7 +31,7 @@ namespace {
 	const float CAMERA_NEAR_PLANE = 0.01f;
 	const float CAMERA_FAR_PLANE = 1000;
 	
-	const float CAMERA_ROTATION_SPEED = 0.5f;
+	const float CAMERA_ROTATION_SPEED = 0.05f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
 	vec3 screenToWorldSpace(float posX, float posY);
@@ -57,7 +57,11 @@ namespace {
 	Graphics4::ConstantLocation specular_power_living_room;
 	Graphics4::ConstantLocation lightPosLocation_living_room;
 	Graphics4::ConstantLocation lightCount_living_room;
-	
+
+	bool renderTrees = true;
+
+	Graphics4::Texture* queenTex;
+
 	void loadLivingRoomShader() {
 		FileReader vs("shader_living_room.vert");
 		FileReader fs("shader_living_room.frag");
@@ -164,9 +168,10 @@ namespace {
 		{
 			vec2i mousePos = System::mousePos();
 			vec3 worldPosition = screenToWorldSpace(mousePos.x(), mousePos.y());
-			//Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
-			vec3 rayDir = cameraPos - worldPosition;
+			Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
+			vec3 rayDir = worldPosition - cameraPos;
 			rayDir.normalize();
+
 			IslandStruct* selected = nullptr;
 			if (selectIsland(storage, cameraPos, rayDir, selected))
 			{
@@ -202,7 +207,17 @@ namespace {
 			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
 			planet->render(tex);
 		}
-		
+
+		//render queen
+		AntQueen* antqueen = storage->antQueen;
+		planet->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * mat4::Scale(antqueen->radius).Transpose());
+		Graphics4::setTexture(tex, queenTex);
+
+		Graphics4::setVertexBuffer(*planet->vertexBuffers[0]);
+		Graphics4::setIndexBuffer(*planet->indexBuffers[0]);
+		Graphics4::drawIndexedVertices();
+		planet->render(tex);
+
 		//render bridges
 		for (int i = 0; i < storage->nextBridge; ++i) {
 			Bridge* logicBridge = storage->bridges[i];
@@ -310,10 +325,10 @@ namespace {
 
 	vec3 screenToWorldSpace(float posX, float posY)
 	{
-		float xClip = 2*(posX / width)- 1.0f;
-		float yClip = 2*(posY / height) - 1.0f;
+		float xClip = (posX / width) - 0.5f;
+		float yClip = -((posY / height) - 0.5f);
 	
-		mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
+		mat4 inverseProView = getViewMatrix().Invert() * getProjectionMatrix().Invert();
 
 		vec4 positionClip(xClip, yClip, 0, 1.0f);
 		vec4 positionWorld = inverseProView * positionClip;
@@ -388,8 +403,11 @@ namespace {
 	void setUpGameLogic()
 	{
 		storage = new Storage();
-		int id0 = createIsland(storage, vec3(2, 1.0f, 2), 1, 100);
-		int id1 = createIsland(storage, vec3(4, 1.0f, 4), 1, 100);
+		int id0 = createIsland(storage, vec3(2.0f, 1.0f, 2.0f), 1, 100);
+		int id1 = createIsland(storage, vec3(4.0f, 1.0f, 4.0f), 1, 100);
+		AntQueen* antqueen = storage->antQueen;
+		antqueen->position = vec3(2.0f, 2.5f, 2.0f);
+		antqueen->radius = 0.5f;
 		storage->islands[id0]->antsOnIsland = 50;
 		createBridge(storage, id0, id1);
 	}
@@ -419,7 +437,7 @@ int kore(int argc, char** argv) {
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-
+	queenTex = new Graphics4::Texture("antQueen.png");
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();

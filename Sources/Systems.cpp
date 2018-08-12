@@ -3,6 +3,7 @@
 #include <math.h>
 #include <utility>
 #include <Kore/Log.h>
+#include <limits>
 		// Todo: tune me right
 //bridge values
 float antsNeededPerBridgeSizeValue = 10.0;
@@ -147,28 +148,43 @@ float bridgeProgressPercentage(Bridge* bridge)
 // twice stolen from the internetz, guaranteed to work doubly good
 // changed variable names for readability
 // removed useless code
-bool IntersectsWith(Kore::vec3 rayOrigin, Kore::vec3 rayDir, Kore::vec3 spherePos, float sphereRadius) {
-	float t0, t1; // solutions for t if the ray intersects 
-				  // geometric solution
-	Kore::vec3 dirRayToSphere = spherePos - rayOrigin;
-	float projectionDirCircleOnRay = dirRayToSphere * rayDir;
+bool IntersectsWith(Kore::vec3 rayStart, Kore::vec3 rayDir, Kore::vec3 spherePos, float sphereRadius, float & out_distance) {
+	Kore::vec3 dirRayStartToSphere = spherePos - rayStart;
+	float distanceToSphere = dirRayStartToSphere.getLength();
+	float projectionDirCircleOnRay = dirRayStartToSphere * rayDir;
 	// if (tca < 0) return false;
-	float distRaySphereSquared = dirRayToSphere * dirRayToSphere - projectionDirCircleOnRay * projectionDirCircleOnRay; 
-	if (distRaySphereSquared > sphereRadius * sphereRadius) 
+	float collisionDepth = sphereRadius * sphereRadius -
+		(distanceToSphere * distanceToSphere - projectionDirCircleOnRay * projectionDirCircleOnRay);
+	if (collisionDepth < 0.0f)
+	{
 		return false;
-	else return true;
+	}
+	else
+	{
+		out_distance = projectionDirCircleOnRay;
+		return true;
+	}
 }
 
 bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, IslandStruct* & selected)
 {
+	float closest = std::numeric_limits<float>::max();
 	for (int i = 0; i < storage->nextIsland; ++i)
 	{
 		IslandStruct* island = storage->islands[i];
-		if (IntersectsWith(rayStart,rayDir,island->position, island->radius))
+		float distance = std::numeric_limits<float>::max();
+		if (IntersectsWith(rayStart,rayDir,island->position, island->radius, distance))
+
 		{
-			selected = island;
-			return true;
+			if (distance < closest)
+			{
+				selected = island;
+				closest = distance;
+			}
 		}
 	}
-	return false;
+	if (closest < std::numeric_limits<float>::max())
+		return true;
+	else return false;
 }
+

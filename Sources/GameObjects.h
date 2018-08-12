@@ -5,6 +5,7 @@
 template <typename T>
 void initializeArrayOfPointers(T** arrayOfPointers, unsigned arraySize);
 
+
 struct IslandStruct
 {
 	int id;
@@ -31,6 +32,13 @@ struct Bridge
 	int completedSinceSeconds;
 };
 
+struct AntQueen
+{
+	Kore::vec3 position;
+	float radius;
+
+};
+
 struct Storage
 {
 	int maxEntities = 255;
@@ -41,6 +49,8 @@ struct Storage
 	Bridge** bridges;
 	int nextBridge;
 
+	AntQueen* antQueen;
+
 	void setUp()
 	{
 		islands = new IslandStruct*[maxEntities];
@@ -49,6 +59,7 @@ struct Storage
 		bridges = new Bridge*[maxEntities];
 		initializeArrayOfPointers(bridges, maxEntities);
 		nextBridge = 0;
+		antQueen = new AntQueen();
 	}
 
 	Storage()
