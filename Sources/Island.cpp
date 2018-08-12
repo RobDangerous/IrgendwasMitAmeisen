@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Trees.h"
+#include "Island.h"
 
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
@@ -36,7 +36,7 @@ namespace {
 	Kore::Graphics4::ConstantLocation lightCount;
 }
 
-Trees::Trees() {
+Island::Island() {
 
 	loadShaderWithAlpha();
 	loadShaderWithoutAlpha();
@@ -48,7 +48,7 @@ Trees::Trees() {
 	trees[0]->M = mat4::Translation(-4, 1, 0) * treeRot.matrix().Transpose();
 }
 
-void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
+void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	Graphics4::setPipeline(pipelineWithoutAlpha);
 
 	Graphics4::setMatrix(vLocation, viewMatrix);
@@ -63,7 +63,7 @@ void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	}
 }
 
-void Trees::loadShaderWithAlpha() {
+void Island::loadShaderWithAlpha() {
 	FileReader vs("shader_tree.vert");
 	FileReader fs("shader_tree.frag");
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
@@ -101,7 +101,7 @@ void Trees::loadShaderWithAlpha() {
 	lightCount = pipelineWithAlpha->getConstantLocation("numLights");
 }
 
-void Trees::loadShaderWithoutAlpha() {
+void Island::loadShaderWithoutAlpha() {
 	FileReader vs("shader_tree.vert");
 	FileReader fs("shader_tree.frag");
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);

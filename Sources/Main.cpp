@@ -10,7 +10,7 @@
 #include <Kore/Input/Mouse.h>
 #include <Kore/Log.h>
 
-#include "Trees.h"
+#include "Island.h"
 #include "Water.h"
 #include "MeshObject.h"
 #include "GameObjects.h"
@@ -98,7 +98,7 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
-	Trees* trees;
+	Island* islands;
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
@@ -174,7 +174,7 @@ namespace {
 			//Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
 			vec3 rayDir = cameraPos - worldPosition;
 			rayDir.normalize();
-			Island* selected = nullptr;
+			IslandStruct* selected = nullptr;
 			if (selectIsland(storage, cameraPos, rayDir, selected))
 			{
 				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
@@ -197,7 +197,7 @@ namespace {
 		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
-			trees->render(P, V);
+			islands->render(P, V);
 		}
 		
 		Graphics4::setPipeline(pipeline);
@@ -417,7 +417,7 @@ int kore(int argc, char** argv) {
 	Mouse::the()->lock(0);
 #endif
 
-	trees = new Trees();
+	islands = new Island();
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);

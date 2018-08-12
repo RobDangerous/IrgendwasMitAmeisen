@@ -2,9 +2,9 @@
 
 #include <Kore/Math/Matrix.h>
 
-class Trees {
+class Island {
 public:
-	Trees();
+	Island();
 	
 	void render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix);
 	
