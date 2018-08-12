@@ -132,6 +132,8 @@ public:
 	
 	Kore::Graphics4::Texture** images;
 	
+	bool alpha;
+	
 	const char* textureDir;
 	std::vector<Mesh*> meshes;
 	std::vector<Geometry*> geometries;
