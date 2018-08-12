@@ -119,11 +119,11 @@ public:
 	void render(Kore::Graphics4::TextureUnit tex);
 	void render(Kore::Graphics4::TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation, Kore::Graphics4::ConstantLocation mLocationInverse, Kore::Graphics4::ConstantLocation diffuseLocation, Kore::Graphics4::ConstantLocation specularLocation, Kore::Graphics4::ConstantLocation specularPowerLocation);
 	
-	void setScale(float scaleFactor);
+	void scaleRootBone(float scaleFactor);
 	Kore::mat4 M;
 	
 	long meshesCount;
-	float scale;
+	float boneScale;
 	const Kore::Graphics4::VertexStructure& structure;
 	Kore::Graphics4::VertexBuffer** vertexBuffers;
 	Kore::Graphics4::IndexBuffer** indexBuffers;

@@ -125,7 +125,7 @@ namespace {
 	
 }
 
-MeshObject::MeshObject(const char* meshFile, const char* textureFile, const VertexStructure& structure, float scale) : textureDir(textureFile), structure(structure), scale(scale), M(mat4::Identity()) {
+MeshObject::MeshObject(const char* meshFile, const char* textureFile, const VertexStructure& structure, float vertexScale) : textureDir(textureFile), structure(structure), boneScale(vertexScale), M(mat4::Identity()) {
 	
 	LoadObj(meshFile);
 	
@@ -164,7 +164,7 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 		// Mesh Vertex Buffer
 		vertexBuffers[j] = new VertexBuffer(mesh->numVertices, structure);
 		float* vertices = vertexBuffers[j]->lock();
-		setVertexFromMesh(vertices, mesh, scale, material->texScaleX, material->texScaleY);
+		setVertexFromMesh(vertices, mesh, vertexScale, material->texScaleX, material->texScaleY);
 		vertexBuffers[j]->unlock();
 		
 		// Mesh Index Buffer
@@ -652,8 +652,7 @@ Light* MeshObject::ConvertLightNode(const OGEX::LightNodeStructure& structure) {
 	return light;
 }
 
-void MeshObject::setScale(float scaleFactor) {
-	// Scale root bone
+void MeshObject::scaleRootBone(float scaleFactor) {
 	BoneNode* root = bones[0];
 	
 	mat4 scaleMat = mat4::Identity();
@@ -662,7 +661,7 @@ void MeshObject::setScale(float scaleFactor) {
 	root->transform = root->transform * scaleMat; //T * R * S
 	root->local = root->transform;
 	
-	scale = scaleFactor;
+	boneScale = scaleFactor;
 }
 
 void MeshObject::setLights(Kore::Graphics4::ConstantLocation lightCountLocation, Kore::Graphics4::ConstantLocation lightPosLocation) {
