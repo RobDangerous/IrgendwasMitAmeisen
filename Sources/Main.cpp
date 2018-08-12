@@ -135,11 +135,9 @@ namespace {
 		cameraUp = right.cross(forward);  // cross product
 		cameraUp.normalize();
 		
-		mat4 V = mat4::lookAlong(cameraDir, cameraPos, cameraUp);
+		mat4 V = mat4::lookAlong(cameraDir, cameraPos,cameraUp);
 		return V;
-	}
-
-
+	}	
 
 	void update() {
 		double t = System::time() - startTime;
@@ -321,8 +319,8 @@ namespace {
 
 	vec3 screenToWorldSpace(float posX, float posY)
 	{
-		float xClip = (posX / width)- 0.5f;
-		float yClip = (posY / height) - 0.5f;
+		float xClip = (posX / width) - 0.5f;
+		float yClip = -((posY / height) - 0.5f);
 	
 		mat4 inverseProView = getViewMatrix().Invert() * getProjectionMatrix().Invert();
 
@@ -338,6 +336,8 @@ namespace {
 		double t = System::time() - startTime;
 		double deltaT = t - lastMouseTime;
 		lastMouseTime = t;
+
+		//if (deltaT > 1.0f / 30.0f) return;
 		
 		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT;
 		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT;

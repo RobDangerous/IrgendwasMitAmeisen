@@ -9,6 +9,7 @@ public:
 	void render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix);
 	
 private:
-	void loadShader();
+	void loadShaderWithAlpha();
+	void loadShaderWithoutAlpha();
 };
 
