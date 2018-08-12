@@ -182,7 +182,7 @@ namespace {
 		for (int i = 0; i < storage->nextIsland; ++i) {
 			mat4 tempM = planet->M;
 			vec3& islandPosition = storage->islands[i]->position;
-			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->setTranslation(mLocation, tempM * mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
 			planet->render(tex);
 		}
 		
@@ -195,7 +195,7 @@ namespace {
 
 			vec3 position = islandFromPosition + ((islandToPosition - islandFromPosition) * 0.5f);
 
-			Graphics4::setMatrix(mLocation, tempM * mat4::Translation(position.x(), position.y(), position.z()));
+			bridge->setTranslation(mLocation, tempM * mat4::Translation(position.x(), position.y(), position.z()));
 			bridge->render(tex);
 		}
 
@@ -336,7 +336,7 @@ int kore(int argc, char** argv) {
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-	bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
+	//bridge->M = mat4::Scale(0.1f, 0.1f, 1.0f);
 
 	cameraPos = vec3(-5, 5, 5);
 

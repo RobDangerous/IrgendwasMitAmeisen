@@ -177,7 +177,7 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 
 
 void MeshObject::render(TextureUnit tex) {
-	for (int i = 0; i < meshesCount; ++i) {
+	for (int i = 0; i < meshesCount; ++i) {		
 		Texture* image = images[i];
 		Graphics4::setTexture(tex, image);
 		
@@ -650,6 +650,15 @@ Light* MeshObject::ConvertLightNode(const OGEX::LightNodeStructure& structure) {
 	}
 	
 	return light;
+}
+
+void MeshObject::setTranslation(Graphics4::ConstantLocation mLocation, mat4 translationMat) {
+	for (int i = 0; i < meshesCount; ++i) {
+		Geometry* geometry = geometries[i];
+		mat4 modelMatrix = translationMat * geometry->transform;
+		
+		Graphics4::setMatrix(mLocation, modelMatrix);
+	}
 }
 
 void MeshObject::scaleRootBone(float scaleFactor) {
