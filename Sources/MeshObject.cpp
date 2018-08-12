@@ -627,6 +627,8 @@ Light* MeshObject::ConvertLightNode(const OGEX::LightNodeStructure& structure) {
 		light->type = 0;
 	} else if (lightName.compare("Point") == 0) {
 		light->type = 1;
+	} else if (lightName.compare("Sun") == 0) {
+		light->type = 1;
 	}
 	
 	//log(Info, "Light name %s, type %i", name, light->type);
@@ -681,12 +683,12 @@ void MeshObject::setLights(Kore::Graphics4::ConstantLocation lightCountLocation,
 		Light* light = lights[i];
 		lightPositions[i] = M * light->position;
 		
-		//if (light->type == 0) {
-		//	lightPositions[i].w() = 0;
-		//}
-		//else if (light->type == 1) {
+		if (light->type == 0) {
+			lightPositions[i].w() = 0;
+		}
+		else if (light->type == 1) {
 			lightPositions[i].w() = 1;
-		//}
+		}
 	}
 	
 	Graphics4::setInt(lightCountLocation, lightCount);
