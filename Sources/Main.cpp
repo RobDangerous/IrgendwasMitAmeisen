@@ -109,11 +109,15 @@ namespace {
 	bool F, L, B, R = false;
 	bool leftMouseDown = false;
 
-	vec3 cameraUp;
+	/*vec3 cameraUp;
 	vec3 right;
 	vec3 forward;
 	float horizontalAngle = -1.24f * pi;
-	float verticalAngle = -0.5f;
+	float verticalAngle = -0.5f;*/
+
+	vec4 camUp(0.0f, 1.0f, 0.0f, 0.0f);
+	vec4 camForward(0.0f, 0.0f, 1.0f, 0.0f);
+	vec4 camRight(1.0f, 0.0f, 0.0f, 0.0f);
 	
 	Kore::Quaternion cameraRotation = Kore::Quaternion(0, 0, 0, 1);
 	vec3 cameraPos = vec3(0, 0, 0);
@@ -127,13 +131,17 @@ namespace {
 	
 	Kore::mat4 getViewMatrix() {
 		// Calculate camera direction
-		vec3 cameraDir = vec3(Kore::cos(verticalAngle) * Kore::sin(horizontalAngle), Kore::sin(verticalAngle), Kore::cos(verticalAngle) * Kore::cos(horizontalAngle));
+		/*vec3 cameraDir = vec3(Kore::cos(verticalAngle) * Kore::sin(horizontalAngle), Kore::sin(verticalAngle), Kore::cos(verticalAngle) * Kore::cos(horizontalAngle));
 		
 		// Re-calculate the orthonormal up vector
 		cameraUp = right.cross(forward);  // cross product
 		cameraUp.normalize();
 		
-		mat4 V = mat4::lookAlong(cameraDir, cameraPos, cameraUp);
+		mat4 V = mat4::lookAlong(cameraDir, cameraPos, cameraUp);*/
+
+		vec3 up(0.0f, 1.0f, 0.0f);
+		mat4 V = mat4::lookAlong(camForward.xyz(), cameraPos, camUp.xyz());
+
 		return V;
 	}
 
@@ -147,23 +155,23 @@ namespace {
 		updateGameObjects(storage, deltaT);
 		Ant::moveEverybody(deltaT);
 
-		cameraUp = vec3(0, 1, 0);
+		/*cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
 		
-		forward = cameraUp.cross(right);  // cross product
+		forward = cameraUp.cross(right);  // cross product*/
 		
 		// Move position of camera based on WASD keys
 		if (S || B) {
-			cameraPos -= forward * (float) deltaT * CAMERA_MOVE_SPEED;
+			cameraPos -= camForward * (float) deltaT * CAMERA_MOVE_SPEED;
 		}
 		if (W || F) {
-			cameraPos += forward * (float) deltaT * CAMERA_MOVE_SPEED;
+			cameraPos += camForward * (float) deltaT * CAMERA_MOVE_SPEED;
 		}
 		if (A || L) {
-			cameraPos -= right * (float)deltaT * CAMERA_MOVE_SPEED;
+			cameraPos -= camRight * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
 		if (D || R) {
-			cameraPos += right * (float)deltaT * CAMERA_MOVE_SPEED;
+			cameraPos += camRight * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
 		
 		//mouse 
@@ -273,8 +281,8 @@ namespace {
 			case Kore::KeyR:
 				break;
 			case KeyL:
-				Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
-				Kore::log(Kore::LogLevel::Info, "Rotation: (%f, %f)", verticalAngle, horizontalAngle);
+				//Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
+				//Kore::log(Kore::LogLevel::Info, "Rotation: (%f, %f)", verticalAngle, horizontalAngle);
 				break;
 			case Kore::KeyEscape:
 			case KeyQ:
@@ -336,10 +344,16 @@ namespace {
 		double t = System::time() - startTime;
 		double deltaT = t - lastMouseTime;
 		lastMouseTime = t;
-		//if (deltaT > 1.0f / 30.0f) return;
 		
-		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT;
-		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT;
+		Quaternion q1(camUp, 0.01f * movementX);
+		Quaternion q2(camRight, 0.01f * -movementY);
+
+		camUp = q2.matrix() * camUp;
+		camRight = q1.matrix() * camRight;
+
+		q1.rotate(q2);
+		mat4 mat = q1.matrix();
+		camForward = mat * camForward;
 	}
 
 	
