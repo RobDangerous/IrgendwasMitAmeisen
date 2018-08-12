@@ -14,15 +14,15 @@ float antCreationPerSecond = 5.0f;
 float antStarvationPerSecond = 0.5f;
 //
 
-void updateIsland(Island* island, float deltaTime);
+void updateIsland(IslandStruct* island, float deltaTime);
 void updateBridge(Bridge* bridge, Storage* storage, float deltaTime);
-std::pair<Island*,Island*> getIslandWithMoreAnts(Island* islandA, Island* islandB);
+std::pair<IslandStruct*,IslandStruct*> getIslandWithMoreAnts(IslandStruct* islandA, IslandStruct* islandB);
 bool isBridgeDone(Bridge* bridge);
 void calcAntsNeededForBridge(Storage* storage, Bridge* bridge);
 
 int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources)
 {
-	Island* island = new Island();
+	IslandStruct* island = new IslandStruct();
 	island->position = position;
 	island->radius = radius;
 	island->antsOnIsland = 0.0f;
@@ -65,7 +65,7 @@ void updateGameObjects(Storage* storage ,float deltaTime)
 	}
 }
 
-void updateIsland(Island* island, float deltaTime)
+void updateIsland(IslandStruct* island, float deltaTime)
 {
 	if (island->antsOnIsland >= 1.0f)
 	{
@@ -89,15 +89,15 @@ void updateIsland(Island* island, float deltaTime)
 
 void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 {
-	Island* fromIsland = storage->islands[bridge->islandIDfrom];
+	IslandStruct* fromIsland = storage->islands[bridge->islandIDfrom];
 	if (isBridgeDone(bridge))
 	{
 
 		float antsMoved = deltaTime * bridge->length / antsValueSpeedPerSecond ;
 		//if bridges are already build, create ant equilibrium between connected islands
-		Island* toIsland = storage->islands[bridge->islandIDto];
+		IslandStruct* toIsland = storage->islands[bridge->islandIDto];
 		
-		std::pair<Island*, Island*> islandInhabitantsComparison = getIslandWithMoreAnts(fromIsland, toIsland);
+		std::pair<IslandStruct*, IslandStruct*> islandInhabitantsComparison = getIslandWithMoreAnts(fromIsland, toIsland);
 		islandInhabitantsComparison.first->antsOnIsland -= antsMoved;
 		islandInhabitantsComparison.second->antsOnIsland += antsMoved;
 		//Kore::log(Kore::LogLevel::Info, "%f ants moved from island %i to island %i.", antsMoved, islandInhabitantsComparison.first->id, islandInhabitantsComparison.second->id);
@@ -116,11 +116,11 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 	}
 }
 
-std::pair<Island*, Island*> getIslandWithMoreAnts(Island* islandA, Island* islandB)
+std::pair<IslandStruct*, IslandStruct*> getIslandWithMoreAnts(IslandStruct* islandA, IslandStruct* islandB)
 {
 	if (islandA->antsOnIsland >= islandB->antsOnIsland)
-		return std::pair<Island*,Island*>(islandA,islandB);
-	else return std::pair<Island*, Island*>(islandB, islandA);
+		return std::pair<IslandStruct*,IslandStruct*>(islandA,islandB);
+	else return std::pair<IslandStruct*, IslandStruct*>(islandB, islandA);
 }
 
 bool isBridgeDone(Bridge* bridge)
@@ -159,11 +159,11 @@ bool IntersectsWith(Kore::vec3 rayOrigin, Kore::vec3 rayDir, Kore::vec3 spherePo
 	else return true;
 }
 
-bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Island* & selected)
+bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, IslandStruct* & selected)
 {
 	for (int i = 0; i < storage->nextIsland; ++i)
 	{
-		Island* island = storage->islands[i];
+		IslandStruct* island = storage->islands[i];
 		if (IntersectsWith(rayStart,rayDir,island->position, island->radius))
 		{
 			selected = island;

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Trees.h"
+#include "Island.h"
 
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
@@ -14,10 +14,9 @@
 using namespace Kore;
 using namespace Kore::Graphics4;
 
-const int maxTrees = 1;
-MeshObject* trees[maxTrees];
-
 namespace {
+	MeshObject* island;
+	
 	Kore::Graphics4::VertexStructure structureTree;
 	Kore::Graphics4::Shader* vertexShader;
 	Kore::Graphics4::Shader* fragmentShader;
@@ -36,7 +35,7 @@ namespace {
 	Kore::Graphics4::ConstantLocation lightCount;
 }
 
-Trees::Trees() {
+Island::Island(const char* meshFile, const char* texturePath) {
 
 	loadShaderWithAlpha();
 	loadShaderWithoutAlpha();
@@ -44,26 +43,24 @@ Trees::Trees() {
 	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	
-	trees[0] = new MeshObject("island/island.ogex", "island/", structureTree, 1.0);
-	trees[0]->M = mat4::Translation(-4, 1, 0) * treeRot.matrix().Transpose();
+	island = new MeshObject(meshFile, texturePath, structureTree, 1.0);
+	island->M = mat4::Translation(-4, 0.6, 0) * treeRot.matrix().Transpose();
 }
 
-void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
+void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	Graphics4::setPipeline(pipelineWithoutAlpha);
 
 	Graphics4::setMatrix(vLocation, viewMatrix);
 	Graphics4::setMatrix(pLocation, projectionMatrix);
 
-	for (int i = 0; i < maxTrees; ++i) {
-		Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
-		Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
-		
-		trees[i]->setLights(lightCount, lightPosLocation);
-		trees[i]->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
-	}
+	Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+	Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
+	
+	island->setLights(lightCount, lightPosLocation);
+	island->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
 }
 
-void Trees::loadShaderWithAlpha() {
+void Island::loadShaderWithAlpha() {
 	FileReader vs("shader_tree.vert");
 	FileReader fs("shader_tree.frag");
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
@@ -101,7 +98,7 @@ void Trees::loadShaderWithAlpha() {
 	lightCount = pipelineWithAlpha->getConstantLocation("numLights");
 }
 
-void Trees::loadShaderWithoutAlpha() {
+void Island::loadShaderWithoutAlpha() {
 	FileReader vs("shader_tree.vert");
 	FileReader fs("shader_tree.frag");
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
