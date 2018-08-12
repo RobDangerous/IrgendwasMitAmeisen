@@ -95,8 +95,7 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
-	const int maxIslands = 1;
-	Island* islands[maxIslands];
+	Island* island;
 	
 	MeshObject* planet;
 	MeshObject* bridge;
@@ -190,9 +189,7 @@ namespace {
 		Graphics4::setMatrix(pLocation_living_room, P);
 		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
-		for(int i = 0; i < maxIslands; ++i) {
-			islands[i]->render(P, V);
-		}
+		island->render(P, V);
 		
 		Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
@@ -416,8 +413,7 @@ int kore(int argc, char** argv) {
 	Mouse::the()->lock(0);
 #endif
 
-	islands[0] = new Island("island/island.ogex", "island/");
-	//islands[1] = new Island("island/island1.ogex", "island/");
+	island = new Island();
 	
 	loadShader();
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
