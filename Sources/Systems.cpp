@@ -73,14 +73,14 @@ void updateIsland(Island* island, float deltaTime)
 		{
 			//create ants if ressources are available
 			island->antsOnIsland += antCreationPerSecond * deltaTime;
-			Kore::log(Kore::LogLevel::Info, "Island %i has currently %f ants", island->id, island->antsOnIsland);
+			//Kore::log(Kore::LogLevel::Info, "Island %i has currently %f ants", island->id, island->antsOnIsland);
 			//remove ressources per ant on island
 			island->currentRessources -= floorf(island->antsOnIsland) * ressourceConsumptionPerAntPerSecond * deltaTime;
-			Kore::log(Kore::LogLevel::Info, "Island %i ressources reduced to %f", island->id, island->currentRessources);
+			//Kore::log(Kore::LogLevel::Info, "Island %i ressources reduced to %f", island->id, island->currentRessources);
 		}
 		else
 		{
-			Kore::log(Kore::LogLevel::Info, "Island %i ants are starving", island->id);
+			//Kore::log(Kore::LogLevel::Info, "Island %i ants are starving", island->id);
 			//ants starve
 			island->antsOnIsland -= island->antsOnIsland * antStarvationPerSecond * deltaTime;
 		}
@@ -100,7 +100,7 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 		std::pair<Island*, Island*> islandInhabitantsComparison = getIslandWithMoreAnts(fromIsland, toIsland);
 		islandInhabitantsComparison.first->antsOnIsland -= antsMoved;
 		islandInhabitantsComparison.second->antsOnIsland += antsMoved;
-		Kore::log(Kore::LogLevel::Info, "%f ants moved from island %i to island %i.", antsMoved, islandInhabitantsComparison.first->id, islandInhabitantsComparison.second->id);
+		//Kore::log(Kore::LogLevel::Info, "%f ants moved from island %i to island %i.", antsMoved, islandInhabitantsComparison.first->id, islandInhabitantsComparison.second->id);
 	}
 	else {
 		//update bridge building with ants -> size
@@ -108,9 +108,9 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 		if (fromIsland->antsOnIsland >= antsConsumedForBridge)
 		{
 			bridge->antsGathered += antsConsumedForBridge;
-			Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
+			//Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
 			fromIsland->antsOnIsland -= antsConsumedForBridge;
-			Kore::log(Kore::LogLevel::Info, "Bridge %i build removed %f ants from island %i", bridge->id, antsConsumedForBridge, bridge->islandIDfrom);
+			//Kore::log(Kore::LogLevel::Info, "Bridge %i build removed %f ants from island %i", bridge->id, antsConsumedForBridge, bridge->islandIDfrom);
 		}
 		//else island does not have enough ants	
 	}

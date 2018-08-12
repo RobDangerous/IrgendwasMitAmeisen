@@ -7,6 +7,7 @@
 #include <Kore/Graphics4/Shader.h>
 #include <Kore/System.h>
 #include <Kore/Input/Keyboard.h>
+#include <Kore/Input/Mouse.h>
 #include <Kore/Log.h>
 
 #include "Trees.h"
@@ -18,6 +19,8 @@
 
 
 using namespace Kore;
+
+vec3 screenToWorldSpace(float posX, float posY);
 
 namespace {
 	const int width = 1024;
@@ -56,6 +59,7 @@ namespace {
 	Graphics4::ConstantLocation lightCount_living_room;
 	
 	bool renderTrees = true;
+
 
 	void loadLivingRoomShader() {
 		FileReader vs("shader_living_room.vert");
@@ -105,7 +109,8 @@ namespace {
 	bool rotate = false;
 	bool W, A, S, D = false;
 	bool F, L, B, R = false;
-	
+	bool leftMouseDown = false;
+
 	vec3 cameraUp;
 	vec3 right;
 	vec3 forward;
@@ -114,6 +119,7 @@ namespace {
 	
 	vec3 cameraPos = vec3(0, 0, 0);
 	
+
 	Kore::mat4 getProjectionMatrix() {
 		mat4 P = mat4::Perspective(45, (float)width / (float)height, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 		P.Set(0, 0, -P.get(0, 0));
@@ -157,6 +163,14 @@ namespace {
 			cameraPos += right * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
 		
+		//mouse 
+		if (leftMouseDown)
+		{
+			vec2i mousePos = System::mousePos();
+			vec3 worldPosition = screenToWorldSpace(mousePos.x(), mousePos.y());
+			Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
+			leftMouseDown = false;
+		}
 		
 		Graphics4::begin();
 		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag, Kore::Graphics1::Color::Black, 1.0f, 0);
@@ -293,6 +307,14 @@ void keyUp(KeyCode code) {
 	}
 }
 
+void mouseDown(int windowId, int mouseButton, int x, int y)
+{
+	if (mouseButton == 0)
+	{
+		leftMouseDown = true;
+	}
+}
+
 vec3 screenToWorldSpace(float posX, float posY)
 {
 	float xClip = (posX / width - 0.5f);
@@ -359,6 +381,8 @@ int kore(int argc, char** argv) {
 	
 	Keyboard::the()->KeyDown = keyDown;
 	Keyboard::the()->KeyUp = keyUp;
+
+	Mouse::the()->Press = mouseDown;
 
 	trees = new Trees();
 	
