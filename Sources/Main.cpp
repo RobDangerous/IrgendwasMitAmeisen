@@ -31,7 +31,7 @@ namespace {
 	const float CAMERA_NEAR_PLANE = 0.01f;
 	const float CAMERA_FAR_PLANE = 1000;
 	
-	const float CAMERA_ROTATION_SPEED = 0.5f;
+	const float CAMERA_ROTATION_SPEED = 0.05f;
 	const float CAMERA_MOVE_SPEED = 4.f;
 	
 	vec3 screenToWorldSpace(float posX, float posY);
@@ -147,7 +147,7 @@ namespace {
 		lastTime = t;
 		
 		updateGameObjects(storage, deltaT);
-		Ant::moveEverybody(deltaT);
+		//Ant::moveEverybody(deltaT);
 
 		cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));
@@ -173,11 +173,11 @@ namespace {
 		{
 			vec2i mousePos = System::mousePos();
 			vec3 worldPosition = screenToWorldSpace(mousePos.x(), mousePos.y());
-			//Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
-			vec3 rayDir = cameraPos - worldPosition;
+			Kore::log(Kore::LogLevel::Info, "Screen position x: %i y: %i to world position x: %f, y: %f, z %f", mousePos.x(), mousePos.y(), worldPosition.x(), worldPosition.y(), worldPosition.z());
+			vec3 rayDir = worldPosition - cameraPos;
 			rayDir.normalize();
 			Island* selected = nullptr;
-			if (selectIsland(storage, cameraPos, rayDir, selected))
+			if (selectIsland(storage, worldPosition, rayDir, selected))
 			{
 				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
 			}
@@ -196,7 +196,7 @@ namespace {
 		Ant::setLights(lightCount_living_room, lightPosLocation_living_room);
 		Graphics4::setMatrix(vLocation_living_room, V);
 		Graphics4::setMatrix(pLocation_living_room, P);
-		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
+		//Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
 
 		if (renderTrees) {
 			trees->render(P, V);
@@ -321,10 +321,10 @@ namespace {
 
 	vec3 screenToWorldSpace(float posX, float posY)
 	{
-		float xClip = 2*(posX / width)- 1.0f;
-		float yClip = 2*(posY / height) - 1.0f;
+		float xClip = (posX / width)- 0.5f;
+		float yClip = (posY / height) - 0.5f;
 	
-		mat4 inverseProView = (getProjectionMatrix() * getViewMatrix()).Invert();
+		mat4 inverseProView = getViewMatrix().Invert() * getProjectionMatrix().Invert();
 
 		vec4 positionClip(xClip, yClip, 0, 1.0f);
 		vec4 positionWorld = inverseProView * positionClip;
@@ -338,7 +338,6 @@ namespace {
 		double t = System::time() - startTime;
 		double deltaT = t - lastMouseTime;
 		lastMouseTime = t;
-		if (deltaT > 1.0f / 30.0f) return;
 		
 		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT;
 		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT;
@@ -411,7 +410,7 @@ int kore(int argc, char** argv) {
 	Keyboard::the()->KeyDown = keyDown;
 	Keyboard::the()->KeyUp = keyUp;
 
-	Mouse::the()->Move = mouseMove;
+	//Mouse::the()->Move = mouseMove;
 	Mouse::the()->Press = mousePress;
 	Mouse::the()->Release = mouseRelease;
 	
