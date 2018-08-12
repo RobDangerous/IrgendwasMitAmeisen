@@ -681,12 +681,12 @@ void MeshObject::setLights(Kore::Graphics4::ConstantLocation lightCountLocation,
 		Light* light = lights[i];
 		lightPositions[i] = M * light->position;
 		
-		if (light->type == 0) {
-			lightPositions[i].w() = 0;
-		}
-		else if (light->type == 1) {
+		//if (light->type == 0) {
+		//	lightPositions[i].w() = 0;
+		//}
+		//else if (light->type == 1) {
 			lightPositions[i].w() = 1;
-		}
+		//}
 	}
 	
 	Graphics4::setInt(lightCountLocation, lightCount);

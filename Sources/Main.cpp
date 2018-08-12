@@ -300,7 +300,7 @@ namespace {
 		double t = System::time() - startTime;
 		double deltaT = t - lastMouseTime;
 		lastMouseTime = t;
-		if (deltaT > 1.0f / 30.0f) return;
+		//if (deltaT > 1.0f / 30.0f) return;
 		
 		horizontalAngle -= CAMERA_ROTATION_SPEED * movementX * deltaT;
 		verticalAngle -= CAMERA_ROTATION_SPEED * movementY * deltaT;
