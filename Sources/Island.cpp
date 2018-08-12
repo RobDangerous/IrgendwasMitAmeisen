@@ -45,7 +45,7 @@ Island::Island() {
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	
 	trees[0] = new MeshObject("island/island.ogex", "island/", structureTree, 1.0);
-	trees[0]->M = mat4::Translation(-4, 1, 0) * treeRot.matrix().Transpose();
+	trees[0]->M = mat4::Translation(-4, 0.6, 0) * treeRot.matrix().Transpose();
 }
 
 void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
