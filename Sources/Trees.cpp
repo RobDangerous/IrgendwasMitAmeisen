@@ -49,14 +49,12 @@ Trees::Trees() {
 }
 
 void Trees::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
+	Graphics4::setPipeline(pipelineWithoutAlpha);
+
+	Graphics4::setMatrix(vLocation, viewMatrix);
+	Graphics4::setMatrix(pLocation, projectionMatrix);
+
 	for (int i = 0; i < maxTrees; ++i) {
-		
-		if(i == (maxTrees - 1)) Graphics4::setPipeline(pipelineWithAlpha);
-		else Graphics4::setPipeline(pipelineWithoutAlpha);
-		
-		Graphics4::setMatrix(vLocation, viewMatrix);
-		Graphics4::setMatrix(pLocation, projectionMatrix);
-		
 		Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
 		Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
 		
