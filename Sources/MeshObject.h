@@ -119,6 +119,7 @@ public:
 	void render(Kore::Graphics4::TextureUnit tex);
 	void render(Kore::Graphics4::TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation, Kore::Graphics4::ConstantLocation mLocationInverse, Kore::Graphics4::ConstantLocation diffuseLocation, Kore::Graphics4::ConstantLocation specularLocation, Kore::Graphics4::ConstantLocation specularPowerLocation);
 	
+	void setTranslation(Kore::Graphics4::ConstantLocation mLocation, Kore::mat4 translationMat);
 	void setScale(float scaleFactor);
 	Kore::mat4 M;
 	
