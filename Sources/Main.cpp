@@ -133,7 +133,7 @@ namespace {
 	}
 	
 	Kore::mat4 getViewMatrix() {
-		mat4 V = mat4::lookAlong(camForward.xyz(), cameraPos, vec3(0.0f, 1.0f, 0.0f));
+		mat4 V = mat4::lookAlong(camForward.xyz(), cameraPos, camUp);
 		return V;
 	}
 
@@ -158,10 +158,10 @@ namespace {
 			cameraPos += camForward * (float) deltaT * CAMERA_MOVE_SPEED;
 		}
 		if (A || L) {
-			cameraPos -= camRight * (float)deltaT * CAMERA_MOVE_SPEED;
+			cameraPos += camRight * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
 		if (D || R) {
-			cameraPos += camRight * (float)deltaT * CAMERA_MOVE_SPEED;
+			cameraPos -= camRight * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
 		
 		//mouse 
@@ -349,7 +349,6 @@ namespace {
 		Quaternion q1(camUp, 0.01f * movementX);
 		Quaternion q2(camRight, 0.01f * -movementY);
 
-		camUp = q2.matrix() * camUp;
 		camRight = q1.matrix() * camRight;
 
 		q1.rotate(q2);
