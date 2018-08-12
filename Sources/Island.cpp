@@ -18,7 +18,7 @@ namespace {
 	const int maxIslands = 2;
 	MeshObject* islands[maxIslands];
 	
-	Kore::Graphics4::VertexStructure structureTree;
+	Kore::Graphics4::VertexStructure structure;
 	Kore::Graphics4::Shader* vertexShader;
 	Kore::Graphics4::Shader* fragmentShader;
 	Kore::Graphics4::PipelineState* pipelineWithAlpha;
@@ -44,10 +44,10 @@ Island::Island() {
 	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
 	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	
-	islands[0] = new MeshObject("island/island.ogex", "island/", structureTree, 1.0);
+	islands[0] = new MeshObject("island/island.ogex", "island/", structure, 1.0);
 	islands[0]->M = mat4::Translation(0, 0.6, 0) * treeRot.matrix().Transpose();
 	
-	islands[1] = new MeshObject("island/island1.ogex", "island/", structureTree, 1.0);
+	islands[1] = new MeshObject("island/island1.ogex", "island/", structure, 1.0);
 	islands[1]->M = mat4::Translation(15, 0.6, 15) * treeRot.matrix().Transpose();
 }
 
@@ -72,12 +72,12 @@ void Island::loadShaderWithAlpha() {
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
 	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 	
-	structureTree.add("pos", Graphics4::Float3VertexData);
-	structureTree.add("tex", Graphics4::Float2VertexData);
-	structureTree.add("nor", Graphics4::Float3VertexData);
+	structure.add("pos", Graphics4::Float3VertexData);
+	structure.add("tex", Graphics4::Float2VertexData);
+	structure.add("nor", Graphics4::Float3VertexData);
 	
 	pipelineWithAlpha = new Graphics4::PipelineState();
-	pipelineWithAlpha->inputLayout[0] = &structureTree;
+	pipelineWithAlpha->inputLayout[0] = &structure;
 	pipelineWithAlpha->inputLayout[1] = nullptr;
 	pipelineWithAlpha->vertexShader = vertexShader;
 	pipelineWithAlpha->fragmentShader = fragmentShader;
@@ -110,12 +110,12 @@ void Island::loadShaderWithoutAlpha() {
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
 	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 	
-	//structureTree.add("pos", Graphics4::Float3VertexData);
-	//structureTree.add("tex", Graphics4::Float2VertexData);
-	//structureTree.add("nor", Graphics4::Float3VertexData);
+	//structure.add("pos", Graphics4::Float3VertexData);
+	//structure.add("tex", Graphics4::Float2VertexData);
+	//structure.add("nor", Graphics4::Float3VertexData);
 	
 	pipelineWithoutAlpha = new Graphics4::PipelineState();
-	pipelineWithoutAlpha->inputLayout[0] = &structureTree;
+	pipelineWithoutAlpha->inputLayout[0] = &structure;
 	pipelineWithoutAlpha->inputLayout[1] = nullptr;
 	pipelineWithoutAlpha->vertexShader = vertexShader;
 	pipelineWithoutAlpha->fragmentShader = fragmentShader;
