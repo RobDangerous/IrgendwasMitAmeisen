@@ -21,8 +21,8 @@ namespace {
 	PipelineState* pipeline;
 	VertexBuffer* vertexBuffer;
 	IndexBuffer* indexBuffer;
-	const int xdiv = 100;
-	const int ydiv = 250;
+	const int xdiv = 1000;
+	const int ydiv = 1000;
 	const int ITER_GEOMETRY = 3;
 	const float SEA_CHOPPY = 4.0f;
 	const float SEA_SPEED = 0.8f * 5.0f;
@@ -75,8 +75,8 @@ void initWater() {
 	float xpos = -1.0;
 	for (int y = 0; y < ydiv; ++y) {
 		for (int x = 0; x < xdiv; ++x) {
-			vertices[y * xdiv * 2 + x * 2 + 0] = (x - (xdiv / 2.0f)) / (xdiv / 2.0f) * 30.0f;
-			vertices[y * xdiv * 2 + x * 2 + 1] = (y - (ydiv / 2.0f)) / (ydiv / 2.0f) * 100.0f;
+			vertices[y * xdiv * 2 + x * 2 + 0] = (x - (xdiv / 2.0f)) / (xdiv / 2.0f) * 1000.0f;
+			vertices[y * xdiv * 2 + x * 2 + 1] = (y - (ydiv / 2.0f)) / (ydiv / 2.0f) * 1000.0f;
 		}
 	}
 	vertexBuffer->unlock();
