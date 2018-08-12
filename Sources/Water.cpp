@@ -15,6 +15,7 @@ using namespace Kore::Graphics4;
 namespace {
 	ConstantLocation matrixLocation;
 	ConstantLocation vmatrixLocation;
+	ConstantLocation camLocation;
 	ConstantLocation timeLocation;
 	ConstantLocation zoffsetLocation;
 	PipelineState* pipeline;
@@ -64,6 +65,7 @@ void initWater() {
 
 	matrixLocation = pipeline->getConstantLocation("transformation");
 	vmatrixLocation = pipeline->getConstantLocation("vtransformation");
+	camLocation = pipeline->getConstantLocation("cam");
 	timeLocation = pipeline->getConstantLocation("time");
 	zoffsetLocation = pipeline->getConstantLocation("zoffset");
 
@@ -94,7 +96,7 @@ void initWater() {
 	indexBuffer->unlock();
 }
 
-void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
+void renderWater(mat4 matrix, mat4 vmatrix, vec3 cam, float zposition) {
 	Graphics4::setPipeline(pipeline);
 	double t = System::time() - timeOffset;
 	if (t > 60 * 10) {
@@ -105,6 +107,7 @@ void renderWater(mat4 matrix, mat4 vmatrix, float zposition) {
 	Graphics4::setFloat(zoffsetLocation, zposition - 5.0f);
 	Graphics4::setMatrix(matrixLocation, matrix);
 	Graphics4::setMatrix(vmatrixLocation, vmatrix);
+	Graphics4::setFloat3(camLocation, cam);
 	Graphics4::setIndexBuffer(*indexBuffer);
 	Graphics4::setVertexBuffer(*vertexBuffer);
 	Graphics4::drawIndexedVertices();
