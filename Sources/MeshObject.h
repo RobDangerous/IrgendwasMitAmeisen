@@ -120,7 +120,7 @@ public:
 	void render(Kore::Graphics4::TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation, Kore::Graphics4::ConstantLocation mLocationInverse, Kore::Graphics4::ConstantLocation diffuseLocation, Kore::Graphics4::ConstantLocation specularLocation, Kore::Graphics4::ConstantLocation specularPowerLocation);
 	
 	void scaleRootBone(float scaleFactor);
-	void setTranslation(Kore::Graphics4::ConstantLocation mLocation, Kore::mat4 translationMat);
+	void setTransformation(Kore::Graphics4::ConstantLocation mLocation, Kore::mat4 transformationMat);
 
 	Kore::mat4 M;
 	

@@ -181,7 +181,7 @@ namespace {
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
 			vec3& islandPosition = storage->islands[i]->position;
-			planet->setTranslation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
 			planet->render(tex);
 		}
 		
@@ -193,7 +193,7 @@ namespace {
 
 			vec3 position = islandFromPosition + ((islandToPosition - islandFromPosition) * 0.5f);
 
-			bridge->setTranslation(mLocation, mat4::Translation(position.x(), position.y(), position.z()));
+			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y(), position.z()));
 			bridge->render(tex);
 		}
 
