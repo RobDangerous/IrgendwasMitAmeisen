@@ -4,6 +4,9 @@
 #include <utility>
 #include <Kore/Log.h>
 #include <limits>
+#include "MeshObject.h"
+#include "Ant.h"
+
 		// Todo: tune me right
 //bridge values
 float antsNeededPerBridgeSizeValue = 10.0;
@@ -21,8 +24,12 @@ std::pair<IslandStruct*,IslandStruct*> getIslandWithMoreAnts(IslandStruct* islan
 bool isBridgeDone(Bridge* bridge);
 void calcAntsNeededForBridge(Storage* storage, Bridge* bridge);
 void moveQueen(AntQueen * queen, float deltaTime);
+void createBridgeNavMeshBetweenIslands(BridgeNavMesh* bridgeNavMesh, IslandStruct* island0, IslandStruct* island1);
+void createBridgeNavMeshPath(Bridge* bridge, Storage* storage, BridgeNavMesh* bridgeNavMesh);
 
-int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources)
+std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode* endNode);
+
+int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources, MeshObject* navMesh)
 {
 	IslandStruct* island = new IslandStruct();
 	island->position = position;
@@ -31,6 +38,8 @@ int createIsland(Storage* storage, Kore::vec3 position, float radius, float ress
 	island->initialRessources = ressources;
 	island->currentRessources = ressources;
 	
+	IslandNavMesh* islandNavMesh = new IslandNavMesh(navMesh->meshes[0], island, position);
+	island->navMesh = islandNavMesh;
 	int id = storage->nextIsland++;
 	island->id = id;
 	storage->islands[id] = island;
@@ -43,9 +52,10 @@ int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 	bridge->antsGathered = 0.0f;
 	bridge->islandIDfrom = islandIDfrom;
 	bridge->islandIDto = islandIDto;
-	calcAntsNeededForBridge(storage, bridge);
 	BridgeNavMesh* bridgeNavMesh = new BridgeNavMesh();
-//	createBridgeNavMeshBetweenIslands(bridgeNavMesh, storage->islands[islandIDfrom], storage->islands[islandIDto]);
+	createBridgeNavMeshBetweenIslands(bridgeNavMesh, storage->islands[islandIDfrom], storage->islands[islandIDto]);
+	bridge->navMesh = bridgeNavMesh;
+	calcAntsNeededForBridge(storage, bridge);
 	int id = storage->nextBridge++;
 	bridge->id = id;
 	storage->bridges[id] = bridge;
@@ -135,9 +145,7 @@ bool isBridgeDone(Bridge* bridge)
 
 void calcAntsNeededForBridge(Storage* storage, Bridge* bridge)
 {
-	Kore::vec3& islandPosFrom = storage->islands[bridge->islandIDfrom]->position;
-	Kore::vec3& islandPosTo = storage->islands[bridge->islandIDto]->position;
-	float distance = islandPosFrom.distance(islandPosTo);
+	float distance = bridgeLength(storage,bridge);
 	bridge->completeBridgeLength = distance;
 	float antsNeeded = ceil(distance * antsNeededPerBridgeSizeValue);
 	bridge->antsNeeded = antsNeeded;
@@ -229,8 +237,14 @@ void createBridgeNavMeshBetweenIslands(BridgeNavMesh* bridgeNavMesh, IslandStruc
 	bridgeNavMesh->closestNodeIsland1 = node1;
 	bridgeNavMesh->islandNavMesh0 = navMesh0;
 	bridgeNavMesh->islandNavMesh1 = navMesh1;
+}
 
-	//create the bezier curve from bridge size
+void createBridgeNavMeshPath(Bridge* bridge, Storage* storage, BridgeNavMesh* bridgeNavMesh)
+{
+	//create the nodes from the bridge steps
+
+	//connect the closestNavMeshPoints to either ends
+	//have a interconnected navmesh!!
 }
 
 int queenOnIsland(Storage* storage)
@@ -277,12 +291,15 @@ void queenPathFromIslandToIsland(Storage* storage, int islandIDfrom, int islandI
 	if (bridge == nullptr)
 	{
 		//create a new bridge
+		createBridge(storage, islandIDfrom, islandIDTo);
 	}
 	else
 	{	
 		//find path from node to node closest to island center
 		NavMeshNode* startNode = closestNavMeshNode(storage->islands[islandIDfrom]->navMesh->nodes,storage->antQueen->position);
-		NavMeshNode* endNode = closestNavMeshNode(storage->islands[islandIDfrom]->navMesh->nodes, storage->islands[islandIDfrom]->position);
+		NavMeshNode* endNode = closestNavMeshNode(storage->islands[islandIDTo]->navMesh->nodes, storage->islands[islandIDTo]->position);
+		storage->antQueen->path = meshNavPathFinding(startNode, endNode);
+		storage->antQueen->pathIndex = 0;
 	}
 }
 
@@ -292,21 +309,31 @@ void moveQueen(AntQueen * queen, float deltaTime)
 	float distanceToGoal = direction.getLength();
 	if (distanceToGoal < queen->goalReachedRadius)
 	{
-		queen->position = queen->goalPoisition;
-	}
-	else 
-	{
-		float stepLength = queen->queenSpeedPerSecond * deltaTime;
-		Kore::vec3 velocity = direction / distanceToGoal;
-		if (distanceToGoal < stepLength)
+		//move quen to next path position
+		if (!queen->path.empty() && queen->pathIndex < queen->path.size())
 		{
-			velocity *= distanceToGoal;
+			queen->pathIndex += 1;
+			queen->goalPoisition = queen->path[queen->pathIndex]->position;
 		}
 		else {
-			velocity *= stepLength;
+			queen->position = queen->goalPoisition;
+			queen->path.clear();
+			queen->pathIndex = 0;
+			return;
 		}
-		queen->position += velocity;
 	}
+	
+	float stepLength = queen->queenSpeedPerSecond * deltaTime;
+	Kore::vec3 velocity = direction / distanceToGoal;
+	if (distanceToGoal < stepLength)
+	{
+		velocity *= distanceToGoal;
+	}
+	else {
+		velocity *= stepLength;
+	}
+	queen->position += velocity;
+	
 }
 
 std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode* endNode)

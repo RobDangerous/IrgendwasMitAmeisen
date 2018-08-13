@@ -40,6 +40,7 @@ public:
 	float legRotation;
 	bool legRotationUp;
 	AntMode mode;
+	int island, bridge;
 private:
     //bool intersectsWith(MeshObject* obj, Kore::vec3 dir);
 	bool intersects(Kore::vec3 dir);
@@ -50,3 +51,7 @@ private:
 const int maxAnts = 500;
 extern int currentAnts;
 extern Ant ants[maxAnts];
+
+int bridgeStepsCount(Bridge* bridge);
+Kore::vec3 bridgeStep(Storage* storage, Bridge* bridge, int step);
+float bridgeLength(Storage* storage, Bridge* bridge);

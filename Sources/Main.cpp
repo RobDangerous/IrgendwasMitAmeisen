@@ -2,6 +2,7 @@
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Graphics1/Graphics.h>
+#include <Kore/Graphics2/Graphics.h>
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
 #include <Kore/Graphics4/Shader.h>
@@ -59,8 +60,9 @@ namespace {
 	Graphics4::ConstantLocation specular_power_basic_lighting;
 	Graphics4::ConstantLocation lightPosLocation_basic_lighting;
 	Graphics4::ConstantLocation lightCount_basic_lighting;
-
-	Graphics4::Texture* queenTex;
+	
+	Graphics4::Texture* antTexture;
+	Graphics4::Texture* treeTexture;
 
 	void loadShaderBasicLighting() {
 		FileReader vs("shader_basic_lighting.vert");
@@ -103,10 +105,16 @@ namespace {
 	
 	Island* island;
 	
-	MeshObject* planet;
+	MeshObject* queen;
 	MeshObject* bridge;
 	MeshObject* navMeshIsland0;
 	Storage* storage;
+	
+	Kore::Graphics2::Graphics2* g2;
+	Kravur* font14;
+	Kravur* font24;
+	Kravur* font34;
+	Kravur* font44;
 
 	// Keyboard controls
 	bool rotate = false;
@@ -178,8 +186,13 @@ namespace {
 			if (selectIsland(storage, cameraPos, rayDir, selected))
 			{
 				Kore::log(Kore::LogLevel::Info, "Selected Island %i",selected->id);
-				vec3 queenGoalPosition = selected->position + vec3(0, queenHeightOffset, 0);
-				storage->antQueen->goalPoisition = queenGoalPosition;
+				int queenIslandId = queenOnIsland(storage);
+				if (selected->id != queenIslandId)
+				{
+					//check if there is a bridge on between the islands
+				}
+				//vec3 queenGoalPosition = selected->position + vec3(0, queenHeightOffset, 0);
+				//storage->antQueen->goalPoisition = queenGoalPosition;
 			}
 			leftMouseDown = false;
 
@@ -208,8 +221,9 @@ namespace {
 		Ant::render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 
 		island->render(P, V);
+		//island->riseSeaLevel(deltaT);
 		
-		Graphics4::setPipeline(pipeline);
+		/*Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
 		//render islands
@@ -220,17 +234,26 @@ namespace {
 		}*/
 
 		//render queen
+		Graphics4::setPipeline(pipeline_basic_lighting);
 		AntQueen* antqueen = storage->antQueen;
-		planet->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * mat4::Scale(antqueen->radius).Transpose());
-		Graphics4::setTexture(tex, queenTex);
+		Kore::Quaternion rot = Kore::Quaternion(0, 0, 0, 1);
+		rot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+		queen->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * rot.matrix().Transpose() * mat4::Scale(1.0));
+		queen->setLights(lightCount_basic_lighting, lightPosLocation_basic_lighting);
+		Graphics4::setMatrix(vLocation_basic_lighting, V);
+		Graphics4::setMatrix(pLocation_basic_lighting, P);
+		queen->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
+		
+		
+		/*Graphics4::setTexture(tex, queenTex);
 
-		Graphics4::setVertexBuffer(*planet->vertexBuffers[0]);
-		Graphics4::setIndexBuffer(*planet->indexBuffers[0]);
+		Graphics4::setVertexBuffer(*queen->vertexBuffers[0]);
+		Graphics4::setIndexBuffer(*queen->indexBuffers[0]);
 		Graphics4::drawIndexedVertices();
-		planet->render(tex);
+		queen->render(tex);*/
 
 		//render bridges
-		for (int i = 0; i < storage->nextBridge; ++i) {
+	/*	for (int i = 0; i < storage->nextBridge; ++i) {
 			Bridge* logicBridge = storage->bridges[i];
 			vec3 islandFromPosition = storage->islands[logicBridge->islandIDfrom]->position;
 			vec3 islandToPosition = storage->islands[logicBridge->islandIDto]->position;
@@ -253,7 +276,27 @@ namespace {
 
 			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y()+0.25f, position.z()) * rotation.matrix().Transpose() * scale);
 			bridge->render(tex);
-		}
+		}*/
+		
+		
+		g2->begin(false, width, height, false);
+		
+		g2->setImageScaleQuality(Graphics2::High);
+		// Show current ant count
+		g2->drawImage(antTexture, 10, 10);
+		g2->setFont(font44);
+		char c1[42];
+		sprintf(c1, "%i", currentAnts);
+		g2->drawString(c1, 120, 10);
+		
+		// Show resources
+		g2->drawImage(treeTexture, 40, 60);
+		g2->setFont(font44);
+		char c2[42];
+		sprintf(c2, "todo");
+		g2->drawString(c2, 120, 60);
+		
+		g2->end();
 
 		Graphics4::end();
 		Graphics4::swapBuffers();
@@ -456,12 +499,13 @@ int kore(int argc, char** argv) {
 	// load the skybox and the ground
 	skybox = new Skybox();
 	skybox->getSkybox(structure);
-
-	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
+	
+	queen = new MeshObject("ant/AntBody_Queen.ogex", "ant/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
+
 	navMeshIsland0 = new MeshObject("IslandNavMesh/IslandNavMesh.ogex", "IslandNavMesh/", structure,1.0f);
-	queenTex = new Graphics4::Texture("antQueen.png");
+
 	cameraPos = vec3(-1, 6, -5);
 
 	initWater();
@@ -470,6 +514,16 @@ int kore(int argc, char** argv) {
 	Ant::updateDirections();
 	
 	setUpGameLogic();
+	
+	font14 = Kravur::load("font/arial", FontStyle(), 14);
+	font24 = Kravur::load("font/arial", FontStyle(), 24);
+	font34 = Kravur::load("font/arial", FontStyle(), 34);
+	font44 = Kravur::load("font/arial", FontStyle(), 44);
+	g2 = new Graphics2::Graphics2(width, height);
+	g2->setFont(font44);
+	
+	antTexture = new Graphics4::Texture("ant/ant_tex.png");
+	treeTexture = new Graphics4::Texture("island/tree.png");
 
 	Kore::System::start();
 

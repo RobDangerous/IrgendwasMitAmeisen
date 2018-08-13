@@ -2,7 +2,7 @@
 #include "MeshObject.h"
 #include "GameObjects.h"
 
-IslandNavMesh::IslandNavMesh(Mesh* navMesh, IslandStruct* island)
+IslandNavMesh::IslandNavMesh(Mesh* navMesh, IslandStruct* island, Kore::vec3 offset)
 {
 	this->island = island;
 	//get faces/triangles 
@@ -23,7 +23,8 @@ IslandNavMesh::IslandNavMesh(Mesh* navMesh, IslandStruct* island)
 		}
 		center /= 3;
 		NavMeshNode* navNode = new NavMeshNode();
-		navNode->position = center;
+		navNode->position = center + offset;
+		nodes.emplace_back(navNode);
 	}
 	//get neighboring vertices of faces to create connections between face centers
 	auto connects = [&](int index, Kore::vec3i triangle) 

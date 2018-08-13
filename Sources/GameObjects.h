@@ -31,6 +31,8 @@ struct Bridge
 	float antsNeeded;
 	float antsGathered;
 	float completeBridgeLength;
+
+	BridgeNavMesh* navMesh;
 };
 
 struct AntQueen

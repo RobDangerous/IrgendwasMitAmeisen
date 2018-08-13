@@ -140,7 +140,7 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 	
 	vertexBuffers = new VertexBuffer*[meshesCount];
 	indexBuffers = new IndexBuffer*[meshesCount];
-	images = new Texture*[20];
+	images = new Texture*[30];
 	
 	for(int j = 0; j < meshesCount; ++j) {
 		Mesh* mesh = meshes[j];
@@ -196,6 +196,21 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 
 void MeshObject::render(TextureUnit tex) {
 	for (int i = 0; i < meshesCount; ++i) {		
+		Texture* image = images[i];
+		Graphics4::setTexture(tex, image);
+		
+		Graphics4::setVertexBuffer(*vertexBuffers[i]);
+		Graphics4::setIndexBuffer(*indexBuffers[i]);
+		Graphics4::drawIndexedVertices();
+	}
+}
+
+void MeshObject::render(TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation) {
+	for (int i = 0; i < meshesCount; ++i) {
+		Geometry* geometry = geometries[i];
+		mat4 modelMatrix = M * geometry->transform;
+		Graphics4::setMatrix(mLocation, modelMatrix);
+		
 		Texture* image = images[i];
 		Graphics4::setTexture(tex, image);
 		

@@ -19,7 +19,7 @@ struct IslandNavMesh
 {
 	std::vector<NavMeshNode*> nodes;
 	IslandStruct* island;
-	IslandNavMesh(Mesh* navMesh, IslandStruct* island);
+	IslandNavMesh(Mesh* navMesh, IslandStruct* island, Kore::vec3 offset);
 };
 
 

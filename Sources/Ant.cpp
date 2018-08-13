@@ -92,6 +92,7 @@ namespace {
 
 	Kore::Graphics4::VertexBuffer** vertexBuffers;
 	MeshObject* body;
+	MeshObject* body_queen;
 	MeshObject* leg;
 	MeshObject* feeler;
 
@@ -156,7 +157,7 @@ namespace {
 	}
 }
 
-Ant::Ant() : mode(Floor), active(true) {
+Ant::Ant() : mode(Floor), active(true), island(-1), bridge(-1) {
 	position = vec3(0.0f, 1.0f, 0.0f);
 	rotation = mat4::Identity();
 	forward = vec4(0, 0, -1, 0);
@@ -167,11 +168,11 @@ Ant::Ant() : mode(Floor), active(true) {
 void Ant::updateDirections() {
 	for (int i = 0; i < maxAnts; ++i) {
 		Ant* ant = &ants[i];
-		int value = Random::get(2000);
+		/*int value = Random::get(2000);
 		value -= 1000;
 		float z = value / 1000.0f;
 		float x = Random::get(1) == 0 ? 1.0 - Kore::abs(z) : -1.0 + Kore::abs(z);
-		ant->forward = vec4(x, 0, z, 0);
+		ant->forward = vec4(x, 0, z, 0);*/
 		ant->forward.normalize();
 		ant->up = vec4(0, 1, 0, 0);
 		vec3 right = vec3(ant->up.x(), ant->up.y(), ant->up.z()).cross(ant->forward.xyz());
@@ -179,9 +180,9 @@ void Ant::updateDirections() {
 		ant->right.normalize();
 	
 		float angle = Kore::atan2(ant->forward.z(), ant->forward.x());
-		ant->rotation = Quaternion(vec3(ant->up.x(), ant->up.y(), ant->up.z()), angle + pi / 2.0f).matrix();
+		ant->rotation = Quaternion(vec3(ant->up.x(), ant->up.y(), ant->up.z()), angle + pi / 2.0f).matrix() * Quaternion(vec3(1.0f, 0.0f, 0.0f), pi / 2.0f).matrix();
 
-		ant->forward.setLength(0.5f + Random::get(500) / 1000.0f);
+		//ant->forward.setLength(0.5f + Random::get(500) / 1000.0f);
 	}
 }
 
@@ -205,6 +206,7 @@ void Ant::init() {
 	structures[1]->add("tint", Graphics4::Float4VertexData);
 
 	body = new MeshObject("ant/AntBody.ogex", "ant/", *structures[0], 10);
+	//body_queen = new MeshObject("ant/AntBody_Queen.ogex", "ant/", *structures[0], 1);
 	leg = new MeshObject("ant/AntLeg.ogex", "ant/", *structures[0], 10);
 	feeler = new MeshObject("ant/AntFeeler.ogex", "ant/", *structures[0], 10);
 
@@ -528,21 +530,124 @@ void Ant::move(float deltaTime) {
 	position += forward * 0.004f;
 }
 
+int bridgeStepsCount(Bridge* bridge) {
+	return Kore::floor(bridge->antsGathered);
+}
+
+vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
+	vec3 island1 = bridge->navMesh->closestNodeIsland0->position + vec3(0.0f, 1.4f, 0.0f);
+	vec3 island2 = bridge->navMesh->closestNodeIsland1->position + vec3(0.0f, 1.4f, 0.0f);
+	vec3 P[3];
+	P[0] = island1;
+	P[1] = (island2 + island1) / 2.0f;
+	P[1].y() = 5.0f;
+	P[2] = island2;
+	return deCasteljau(P, (step / bridge->antsGathered) * (bridge->antsGathered / bridge->antsNeeded));
+}
+
+float bridgeLength(Storage* storage, Bridge* bridge) {
+	float length = 0;
+	vec3 last = bridgeStep(storage, bridge, 0);
+	for (int i = 1; i < bridgeStepsCount(bridge); ++i) {
+		length += (bridgeStep(storage, bridge, i) - last).getLength();
+	}
+	return length;
+}
+
 void Ant::moveEverybody(Storage* storage, float deltaTime) {
-	int ant = 0;
-	for (int i = 0; i < storage->nextBridge; ++i) {
-		Bridge* bridge = storage->bridges[i];
-		vec3 island1 = storage->islands[bridge->islandIDfrom]->position;
-		vec3 island2 = storage->islands[bridge->islandIDto]->position;
-		vec3 P[3];
-		P[0] = island1;
-		P[1] = (island2 + island1) / 2.0f;
-		P[1].y() = 5.0f;
-		P[2] = island2;
-		for (int a = 0; a < Kore::floor(bridge->antsGathered); ++a) {
-			ants[ant++].position = deCasteljau(P, (a / bridge->antsGathered) * (bridge->antsGathered / bridge->antsNeeded));
+	for (int i = 0; i < storage->nextIsland; ++i) {
+		IslandStruct* island = storage->islands[i];
+		int count = Kore::floor(island->antsOnIsland);
+		if (count < 1) continue;
+		int found = 0;
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].island == i) {
+				if (found == count) {
+					ants[a].island = -1;
+				}
+				else {
+					++found;
+				}
+			}
+		}
+		if (found == count) {
+			continue;
+		}
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].island == -1 && ants[a].bridge == -1) {
+				ants[a].island = i;
+				ants[a].bridge = -1;
+				ants[a].position = island->position + vec3(0.0f, 1.4f, 0.0f);
+				++found;
+			}
+			if (found == count) {
+				break;
+			}
 		}
 	}
+
+	for (int a = 0; a < maxAnts; ++a) {
+		if (ants[a].island != -1) {
+			ants[a].position += ants[a].forward * 0.1f;
+			vec3 ip = storage->islands[ants[a].island]->position;
+			ip.y() = ants[a].position.y();
+			if ((ants[a].position - ip).getLength() >= storage->islands[ants[a].island]->radius * 0.5f) {
+				vec3 forward = ip - ants[a].position;
+				ants[a].forward = vec4(forward.x(), forward.y(), forward.z(), 0.0f);
+				ants[a].forward.normalize();
+
+				//ants[a].rotation = Quaternion(ants[a].forward.xyz(), 0.0f).matrix();
+			}
+		}
+	}
+
+	for (int i = 0; i < storage->nextBridge; ++i) {
+		Bridge* bridge = storage->bridges[i];
+		int count = bridgeStepsCount(bridge);
+		int found = 0;
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].bridge == i) {
+				if (found == count) {
+					ants[a].bridge = -1;
+				}
+				else {
+					++found;
+				}
+			}
+		}
+		if (found == count) {
+			continue;
+		}
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].island == -1 && ants[a].bridge == -1) {
+				ants[a].bridge = i;
+				ants[a].island = -1;
+				++found;
+			}
+			if (found == count) {
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < storage->nextBridge; ++i) {
+		Bridge* bridge = storage->bridges[i];
+		int count = bridgeStepsCount(bridge);
+		int step = 0;
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].bridge == i) {
+				ants[a].position = bridgeStep(storage, bridge, step++);
+			}
+		}
+	}
+
+	for (int a = 0; a < maxAnts; ++a) {
+		if (ants[a].island == -1 && ants[a].bridge == -1) {
+			ants[a].position.y() = -2.0f;
+		}
+	}
+
+	updateDirections();
 
 	return;
 	++count;
