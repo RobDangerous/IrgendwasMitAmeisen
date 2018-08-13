@@ -16,7 +16,7 @@
 #include "GameObjects.h"
 #include "Systems.h"
 #include "Ant.h"
-
+#include "Skybox.h"
 
 using namespace Kore;
 
@@ -60,8 +60,6 @@ namespace {
 	Graphics4::ConstantLocation lightPosLocation_living_room;
 	Graphics4::ConstantLocation lightCount_living_room;
 
-	bool renderTrees = true;
-
 	Graphics4::Texture* queenTex;
 
 	void loadLivingRoomShader() {
@@ -101,6 +99,8 @@ namespace {
 		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
 	}
 
+	Skybox* skybox;
+	
 	Island* island;
 	
 	MeshObject* planet;
@@ -165,7 +165,7 @@ namespace {
 			cameraPos -= camRight * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
 		
-		//mouse 
+		//mouse
 		if (leftMouseDown)
 		{
 			/*vec2i mousePos = System::mousePos();
@@ -440,6 +440,11 @@ int kore(int argc, char** argv) {
 	Mouse::the()->lock(0);
 #endif
 
+	// load the skybox and the ground
+	skybox = new Skybox();
+	skybox->getSkybox();
+
+	
 	island = new Island();
 	
 	loadShader();
