@@ -67,8 +67,8 @@ void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 }
 
 void Island::loadShaderWithAlpha() {
-	FileReader vs("shader_tree.vert");
-	FileReader fs("shader_tree.frag");
+	FileReader vs("shader_basic_lighting.vert");
+	FileReader fs("shader_basic_lighting.frag");
 	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
 	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 	
