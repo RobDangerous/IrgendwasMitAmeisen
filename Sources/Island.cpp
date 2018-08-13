@@ -52,17 +52,15 @@ Island::Island() {
 }
 
 void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
+	Graphics4::setPipeline(pipelineWithoutAlpha);
+	
+	Graphics4::setMatrix(vLocation, viewMatrix);
+	Graphics4::setMatrix(pLocation, projectionMatrix);
+	
+	Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
+	Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
+
 	for (int i = 0; i < maxIslands; ++i) {
-		
-		if (islands[i]->alpha) Graphics4::setPipeline(pipelineWithoutAlpha);
-		else Graphics4::setPipeline(pipelineWithAlpha);
-		
-		Graphics4::setMatrix(vLocation, viewMatrix);
-		Graphics4::setMatrix(pLocation, projectionMatrix);
-		
-		Graphics4::setTextureAddressing(tex, Graphics4::U, Graphics4::Repeat);
-		Graphics4::setTextureAddressing(tex, Graphics4::V, Graphics4::Repeat);
-		
 		islands[i]->setLights(lightCount, lightPosLocation);
 		islands[i]->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
 	}
