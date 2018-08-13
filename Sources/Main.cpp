@@ -123,9 +123,7 @@ namespace {
 	vec4 camForward(0.0f, 0.0f, 1.0f, 0.0f);
 	vec4 camRight(1.0f, 0.0f, 0.0f, 0.0f);
 	
-	Kore::Quaternion cameraRotation = Kore::Quaternion(0, 0, 0, 1);
 	vec3 cameraPos = vec3(0, 0, 0);
-	
 
 	Kore::mat4 getProjectionMatrix() {
 		mat4 P = mat4::Perspective(45, (float)width / (float)height, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
@@ -291,8 +289,8 @@ namespace {
 			case Kore::KeyR:
 				break;
 			case KeyL:
-				//Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
-				//Kore::log(Kore::LogLevel::Info, "Rotation: (%f, %f)", verticalAngle, horizontalAngle);
+				Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
+				Kore::log(Kore::LogLevel::Info, "Looking at: (%f, %f %f %f)", camForward.x(), camForward.y(), camForward.z(), camForward.w());
 				break;
 			case Kore::KeyEscape:
 			case KeyQ:
@@ -463,7 +461,7 @@ int kore(int argc, char** argv) {
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
 	queenTex = new Graphics4::Texture("antQueen.png");
-	cameraPos = vec3(-5, 5, 5);
+	cameraPos = vec3(-1, 6, -5);
 
 	initWater();
 	loadShaderBasicLighting();
