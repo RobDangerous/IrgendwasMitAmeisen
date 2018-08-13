@@ -357,6 +357,9 @@ void moveQueen(AntQueen * queen, float deltaTime)
 	
 }
 
+typedef std::pair<NavMeshNode*, std::pair<Path*, float>> AStarNode;
+
+//TODO: Path is broken
 std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode* endNode)
 {
 	Path* startPath = new Path;
@@ -364,16 +367,16 @@ std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode
 	startPath->previous = nullptr;
 	std::vector<Path*> paths;
 	paths.emplace_back(startPath);
-	Path* pathTree = paths[0];
-	std::pair<NavMeshNode*, float> startANode(startNode, 0);
+
+	AStarNode startANode(startNode, std::pair<Path*, float>(startPath, 0));
 
 	std::vector<NavMeshNode*> path;
-	std::vector<std::pair<NavMeshNode*, float>> visited;
-	std::vector<std::pair<NavMeshNode*,float>> open;
+	std::vector<AStarNode> visited;
+	std::vector<AStarNode> open;
 	
 	open.emplace_back(startANode);
 
-	auto getANodeIndex = [](NavMeshNode* node, std::vector<std::pair<NavMeshNode*, float>>& list)
+	auto getANodeIndex = [](NavMeshNode* node, std::vector<AStarNode>& list)
 	{
 		for (int i = 0; i < list.size(); ++i)
 		{
@@ -385,7 +388,7 @@ std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode
 		return -1;
 	};
 
-	auto placeNeighbors = [&](std::pair<NavMeshNode*,float>& Anode)
+	auto placeNeighbors = [&](AStarNode& Anode)
 	{
 		NavMeshNode* node = Anode.first;
 		for (int i = 0; i < node->neighbors.size(); ++i)
@@ -396,16 +399,22 @@ std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode
 				if (index != -1)
 				{
 					auto neighbor = open[index];
-					float distanceValue = (node->position - neighbor.first->position).squareLength() + Anode.second;
-					if (neighbor.second > distanceValue)
+					float distanceValue = (node->position - neighbor.first->position).squareLength() + Anode.second.second;
+					if (neighbor.second.second > distanceValue)
 					{
-						neighbor.second = distanceValue;
+						neighbor.second.second = distanceValue;
+						neighbor.second.first->node = node;
+						neighbor.second.first->previous = Anode.second.first;
 					}
 				}
 				else if (getANodeIndex(node->neighbors[i], visited) == -1)
 				{
-					std::pair<NavMeshNode*, float> neighbor(node->neighbors[i], Anode.second);
-					neighbor.second += (node->position - neighbor.first->position).squareLength();
+					Path* path = new Path();
+					path->node = node->neighbors[i];
+					path->previous = Anode.second.first;
+					paths.emplace_back(path);
+					AStarNode neighbor(node->neighbors[i], std::pair<Path*,float>(path, Anode.second.second));
+					neighbor.second.second += (node->position - neighbor.first->position).squareLength();
 					open.emplace_back(neighbor);
 				}
 		}
@@ -418,20 +427,21 @@ std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode
 		int closestIndex = -1;
 		for (int i = 0; i < open.size(); ++i)
 		{
-			if (open[i].second < closest)
+			if (open[i].second.second < closest)
 			{
-				closestIndex = open[i].second;
+				closestIndex = open[i].second.second;
 				closestIndex = i;
 			}
 		}
-		std::pair<NavMeshNode*, float> closestNode = open[closestIndex];
+		AStarNode closestNode = open[closestIndex];
 
 		open.erase(open.begin() + closestIndex);
 		return closestNode;
 	};
 
-	auto buildPath = [&] ()
+	auto buildPath = [&] (AStarNode& endNode)
 	{
+		Path* pathTree = endNode.second.first;
 		while (pathTree->previous != nullptr)
 		{
 			path.insert(path.begin(), pathTree->node);
@@ -445,17 +455,12 @@ std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode
 
 	while (!open.empty())
 	{
-		std::pair<NavMeshNode*, float> Anode = closestNeighbor();
+		AStarNode Anode = closestNeighbor();
 
-		Path* lastPath = new Path;
-		lastPath->node = Anode.first;
-		lastPath->previous = pathTree;
-		paths.emplace_back(lastPath);
-		pathTree = lastPath;
 
 		if (Anode.first == endNode)
 		{
-			buildPath();
+			buildPath(Anode);
 			return path;
 		}
 
@@ -463,6 +468,5 @@ std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode
 
 		placeNeighbors(Anode);
 	}
-	buildPath();
 	return path;
 }

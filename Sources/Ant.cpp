@@ -590,13 +590,14 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 			if (ants[a].island == -1 && ants[a].bridge == -1) {
 				ants[a].island = i;
 				ants[a].bridge = -1;
-				ants[a].position = island->position + vec3(0.0f, 1.4f, 0.0f);
+				ants[a].position = island->position + vec3(0.0f, 1.0f, 0.0f);
 
 				int value = Random::get(2000);
 				value -= 1000;
 				float z = value / 1000.0f;
 				float x = Random::get(1) == 0 ? 1.0 - Kore::abs(z) : -1.0 + Kore::abs(z);
 				ants[a].forward = vec4(x, 0, z, 0);
+				ants[a].forward.normalize();
 
 				++found;
 			}
@@ -608,7 +609,9 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 
 	for (int a = 0; a < maxAnts; ++a) {
 		if (ants[a].island != -1) {
-			ants[a].position += ants[a].forward * 0.1f;
+			vec4 forward = ants[a].forward;
+			forward.setLength(deltaTime);
+			ants[a].position += forward;
 			vec3 ip = storage->islands[ants[a].island]->position;
 			ip.y() = ants[a].position.y();
 			if ((ants[a].position - ip).getLength() >= storage->islands[ants[a].island]->radius * 0.5f) {
@@ -664,6 +667,9 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 	for (int a = 0; a < maxAnts; ++a) {
 		if (ants[a].island == -1 && ants[a].bridge == -1) {
 			ants[a].position.y() = -2.0f;
+		}
+		else {
+			ants[a].legRotation += 0.2f;
 		}
 	}
 
