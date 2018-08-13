@@ -578,6 +578,13 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 				ants[a].island = i;
 				ants[a].bridge = -1;
 				ants[a].position = island->position + vec3(0.0f, 1.4f, 0.0f);
+
+				int value = Random::get(2000);
+				value -= 1000;
+				float z = value / 1000.0f;
+				float x = Random::get(1) == 0 ? 1.0 - Kore::abs(z) : -1.0 + Kore::abs(z);
+				ants[a].forward = vec4(x, 0, z, 0);
+
 				++found;
 			}
 			if (found == count) {
