@@ -64,6 +64,7 @@ namespace {
 	Graphics4::Texture* queenTex;
 	
 	Graphics4::Texture* antTexture;
+	Graphics4::Texture* treeTexture;
 
 	void loadShaderBasicLighting() {
 		FileReader vs("shader_basic_lighting.vert");
@@ -269,11 +270,16 @@ namespace {
 		// Show current ant count
 		g2->drawImage(antTexture, 10, 10);
 		g2->setFont(font44);
-		char c[42];
-		sprintf(c, "%i", currentAnts);
-		g2->drawString(c, 120, 10);
+		char c1[42];
+		sprintf(c1, "%i", currentAnts);
+		g2->drawString(c1, 120, 10);
 		
-		// TODO: show resources
+		// Show resources
+		g2->drawImage(treeTexture, 40, 60);
+		g2->setFont(font44);
+		char c2[42];
+		sprintf(c2, "todo");
+		g2->drawString(c2, 120, 60);
 		
 		g2->end();
 
@@ -501,6 +507,7 @@ int kore(int argc, char** argv) {
 	g2->setFont(font44);
 	
 	antTexture = new Graphics4::Texture("ant/ant_tex.png");
+	treeTexture = new Graphics4::Texture("island/tree.png");
 
 	Kore::System::start();
 
