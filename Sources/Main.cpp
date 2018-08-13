@@ -216,7 +216,7 @@ namespace {
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
 			vec3& islandPosition = storage->islands[i]->position;
-			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()) * mat4::Scale(storage->islands[i]->radius));
 			planet->render(tex);
 		}
 
@@ -416,8 +416,19 @@ namespace {
 	void setUpGameLogic()
 	{
 		storage = new Storage();
-		int id0 = createIsland(storage, vec3(2.0f, 1.0f, 2.0f), 1, 100);
-		int id1 = createIsland(storage, vec3(4.0f, 1.0f, 4.0f), 1, 100);
+		
+		Kore::vec3 center;
+		float radius;
+		island->islands[0]->getBoundingBox(&center, &radius);
+		radius = 5;
+		log(Info, "1: %f", radius);
+		int id0 = createIsland(storage, center, radius, 100);
+		
+		island->islands[1]->getBoundingBox(&center, &radius);
+		radius = 5;
+		log(Info, "2: %f", radius);
+		int id1 = createIsland(storage, center, radius, 100);
+		
 		AntQueen* antqueen = storage->antQueen;
 		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
 		antqueen->goalPoisition = antqueen->position;

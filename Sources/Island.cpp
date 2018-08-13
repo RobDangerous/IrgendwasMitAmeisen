@@ -10,15 +10,10 @@
 #include <Kore/System.h>
 #include <Kore/Log.h>
 
-#include "MeshObject.h"
-
 using namespace Kore;
 using namespace Kore::Graphics4;
 
 namespace {
-	const int maxIslands = 2;
-	MeshObject* islands[maxIslands];
-	
 	Kore::Graphics4::VertexStructure structure;
 	Kore::Graphics4::Shader* vertexShader;
 	Kore::Graphics4::Shader* fragmentShader;

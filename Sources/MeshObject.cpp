@@ -718,6 +718,6 @@ void MeshObject::getBoundingBox(Kore::vec3* center, float* radius) {
 	vec4 position = M * vec4(0, 0, 0, 1);
 	*center = Kore::vec3(position.x(), position.y(), position.z());
 
-	*radius = std::max(std::max(xDim, yDim), zDim);
+	*radius = std::max(std::max(xDim / 2.0, yDim / 2.0), zDim / 2.0);
 }
 
