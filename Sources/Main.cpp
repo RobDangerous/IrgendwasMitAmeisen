@@ -2,6 +2,7 @@
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Graphics1/Graphics.h>
+#include <Kore/Graphics2/Graphics.h>
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
 #include <Kore/Graphics4/Shader.h>
@@ -61,6 +62,8 @@ namespace {
 	Graphics4::ConstantLocation lightCount_basic_lighting;
 
 	Graphics4::Texture* queenTex;
+	
+	Graphics4::Texture* antTexture;
 
 	void loadShaderBasicLighting() {
 		FileReader vs("shader_basic_lighting.vert");
@@ -106,6 +109,12 @@ namespace {
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
+	
+	Kore::Graphics2::Graphics2* g2;
+	Kravur* font14;
+	Kravur* font24;
+	Kravur* font34;
+	Kravur* font44;
 
 	// Keyboard controls
 	bool rotate = false;
@@ -208,7 +217,7 @@ namespace {
 
 		island->render(P, V);
 		
-		Graphics4::setPipeline(pipeline);
+		/*Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
 		//render islands
@@ -216,7 +225,7 @@ namespace {
 			vec3& islandPosition = storage->islands[i]->position;
 			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()) * mat4::Scale(storage->islands[i]->radius));
 			planet->render(tex);
-		}
+		}*/
 
 		//render queen
 		AntQueen* antqueen = storage->antQueen;
@@ -253,6 +262,20 @@ namespace {
 			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y()+0.25f, position.z()) * rotation.matrix().Transpose() * scale);
 			bridge->render(tex);
 		}
+		
+		
+		g2->begin(false, width, height, false);
+		
+		// Show current ant count
+		g2->drawImage(antTexture, 10, 10);
+		g2->setFont(font44);
+		char c[42];
+		sprintf(c, "%i", currentAnts);
+		g2->drawString(c, 120, 10);
+		
+		// TODO: show resources
+		
+		g2->end();
 
 		Graphics4::end();
 		Graphics4::swapBuffers();
@@ -469,6 +492,15 @@ int kore(int argc, char** argv) {
 	Ant::updateDirections();
 	
 	setUpGameLogic();
+	
+	font14 = Kravur::load("font/arial", FontStyle(), 14);
+	font24 = Kravur::load("font/arial", FontStyle(), 24);
+	font34 = Kravur::load("font/arial", FontStyle(), 34);
+	font44 = Kravur::load("font/arial", FontStyle(), 44);
+	g2 = new Graphics2::Graphics2(width, height);
+	g2->setFont(font44);
+	
+	antTexture = new Graphics4::Texture("ant/ant_tex.png");
 
 	Kore::System::start();
 
