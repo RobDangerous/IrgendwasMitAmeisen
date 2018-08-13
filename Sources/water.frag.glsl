@@ -89,7 +89,7 @@ const vec4 Cd = vec4 ( 0,  0, .6, 0);
 const vec4 Cs = vec4 (.9, .9, .9, 0);
 const float kse = 30;
 
-const vec3 light = normalize (vec3 (2, 1, 3));
+const vec3 light = normalize (vec3 (2, 1, 1));
 
 void main() {
 	vec3 normal = (vtransformation * vec4(calcNormal(newpos.x, newpos.y), 0.0)).xyz;
