@@ -32,3 +32,9 @@ struct BridgeNavMesh
 	IslandNavMesh* islandNavMesh1;
 	Bridge* bridge;
 };
+
+struct Path
+{
+	Path* previous;
+	NavMeshNode* node;
+};

@@ -44,7 +44,8 @@ int createBridge(Storage* storage, int islandIDfrom, int islandIDto)
 	bridge->islandIDfrom = islandIDfrom;
 	bridge->islandIDto = islandIDto;
 	calcAntsNeededForBridge(storage, bridge);
-
+	BridgeNavMesh* bridgeNavMesh = new BridgeNavMesh();
+//	createBridgeNavMeshBetweenIslands(bridgeNavMesh, storage->islands[islandIDfrom], storage->islands[islandIDto]);
 	int id = storage->nextBridge++;
 	bridge->id = id;
 	storage->bridges[id] = bridge;
@@ -191,40 +192,98 @@ bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Isla
 	else return false;
 }
 
+NavMeshNode* closestNavMeshNode(std::vector<NavMeshNode*> nodes, Kore::vec3 position)
+{
+	float closest = std::numeric_limits<float>::max();
+	NavMeshNode* closestNode = nullptr;
+	for (int i = 0;nodes.size(); ++i)
+	{
+		Kore::vec3 pos = nodes[i]->position;
+		Kore::vec3 dist = position - pos;
+		float squareDist = dist.squareLength();
+		if (closest > squareDist)
+		{
+			closest = squareDist;
+			closestNode = nodes[i];
+		}
+	}
+	return closestNode;
+}
+
 void createBridgeNavMeshBetweenIslands(BridgeNavMesh* bridgeNavMesh, IslandStruct* island0, IslandStruct* island1)
 {
 	Kore::vec3 islandMidpoint = (island0->position + island1->position) * 0.5f;
-	auto closestNode = [&](IslandNavMesh* mesh, float& closest, NavMeshNode* node0)
-	{
-		for (int i = 0; mesh->nodes.size(); ++i)
-		{
-			Kore::vec3 pos = mesh->nodes[i]->position;
-			Kore::vec3 dist = islandMidpoint - pos;
-			float squareDist = dist.squareLength();
-			if (closest > squareDist)
-			{
-				closest = squareDist;
-				node0 = mesh->nodes[i];
-			}
-		}
-	};
+
 
 	//find the closest point to the midpoint
 	IslandNavMesh* navMesh0 = island0->navMesh;
-	float closest = std::numeric_limits<float>::max();
 	NavMeshNode* node0;
 
 	IslandNavMesh* navMesh1 = island1->navMesh;
 	NavMeshNode* node1;
 	
-	closestNode(navMesh0, closest, node0);
-	closest = std::numeric_limits<float>::max();
-	closestNode(navMesh1, closest, node1);
+	node0 = closestNavMeshNode(navMesh0->nodes, islandMidpoint);
+	node1 = closestNavMeshNode(navMesh1->nodes, islandMidpoint);
 
 	bridgeNavMesh->closestNodeIsland0 = node0;
 	bridgeNavMesh->closestNodeIsland1 = node1;
 	bridgeNavMesh->islandNavMesh0 = navMesh0;
 	bridgeNavMesh->islandNavMesh1 = navMesh1;
+
+	//create the bezier curve from bridge size
+}
+
+int queenOnIsland(Storage* storage)
+{
+	Kore::vec3& queenPos = storage->antQueen->position;
+	float queenRadius = storage->antQueen->radius;
+
+	for (int i = 0; i < storage->nextIsland; ++i)
+	{
+		Kore::vec3& islandPos = storage->islands[i]->position;
+		float islandRadius = storage->islands[i]->radius;
+
+		float distSq = (queenPos - islandPos).squareLength();
+		float radii = queenRadius + islandRadius;
+		if (distSq <= radii * radii)
+			return i;
+	}
+}
+
+NavMeshNode* centerIslandNode(IslandStruct* island)
+{
+	auto nodes = island->navMesh->nodes;
+	Kore::vec3& pos = island->position;
+
+	NavMeshNode* centerNode = closestNavMeshNode(nodes, pos);
+	return centerNode;
+}
+
+void queenPathFromIslandToIsland(Storage* storage, int islandIDfrom, int islandIDTo)
+{
+	//find if there is a bridge between the islands, else create one
+	Bridge* bridge = nullptr;
+	for (int i = 0; i < storage->nextBridge; ++i)
+	{
+		Bridge* b = storage->bridges[i];
+		if((b->islandIDfrom == islandIDfrom && b->islandIDto == islandIDTo)
+			|| (b->islandIDfrom == islandIDTo && b->islandIDto == islandIDfrom))
+		{
+			bridge = b;
+		}
+	}
+	//if bridge, find closest node from queen to closest node on other island
+
+	if (bridge == nullptr)
+	{
+		//create a new bridge
+	}
+	else
+	{	
+		//find path from node to node closest to island center
+		NavMeshNode* startNode = closestNavMeshNode(storage->islands[islandIDfrom]->navMesh->nodes,storage->antQueen->position);
+		NavMeshNode* endNode = closestNavMeshNode(storage->islands[islandIDfrom]->navMesh->nodes, storage->islands[islandIDfrom]->position);
+	}
 }
 
 void moveQueen(AntQueen * queen, float deltaTime)
@@ -248,4 +307,111 @@ void moveQueen(AntQueen * queen, float deltaTime)
 		}
 		queen->position += velocity;
 	}
+}
+
+std::vector<NavMeshNode*> meshNavPathFinding(NavMeshNode* startNode, NavMeshNode* endNode)
+{
+	Path startPath;
+	startPath.node = startNode;
+	startPath.previous = nullptr;
+	std::vector<Path> paths;
+	paths.emplace_back(startPath);
+	Path* pathTree = &paths[0];
+	std::pair<NavMeshNode*, float> startANode(startNode, 0);
+
+	std::vector<NavMeshNode*> path;
+	std::vector<std::pair<NavMeshNode*, float>> visited;
+	std::vector<std::pair<NavMeshNode*,float>> open;
+	
+	open.emplace_back(startANode);
+
+	auto getANodeIndex = [](NavMeshNode* node, std::vector<std::pair<NavMeshNode*, float>>& list)
+	{
+		for (int i = 0; i < list.size(); ++i)
+		{
+			if (list[i].first == node)
+			{
+				return i;
+			}
+		}
+		return -1;
+	};
+
+	auto placeNeighbors = [&](std::pair<NavMeshNode*,float>& Anode)
+	{
+		NavMeshNode* node = Anode.first;
+		for (int i = 0; i < node->neighbors.size(); ++i)
+		{
+			//check if neighbor is already in set
+			if (getANodeIndex(node->neighbors[i], visited) != -1)
+			{
+				int index = getANodeIndex(node->neighbors[i], open);
+				if (index != -1)
+				{
+					auto neighbor = open[index];
+					float distanceValue = (node->position - neighbor.first->position).squareLength() + Anode.second;
+					if (neighbor.second > distanceValue)
+					{
+						neighbor.second = distanceValue;
+					}
+				}
+				else {
+					std::pair<NavMeshNode*, float> neighbor(node->neighbors[i], Anode.second);
+					neighbor.second += (node->position - neighbor.first->position).squareLength();
+					open.emplace_back(neighbor);
+				}
+			}
+		}
+	};
+
+	auto closestNeighbor = [&]()
+	{
+		float closest = std::numeric_limits<float>::max();
+		
+		int closestIndex = -1;
+		for (int i = 0; i < open.size(); ++i)
+		{
+			if (open[i].second < closest)
+			{
+				closestIndex = open[i].second;
+				closestIndex = i;
+			}
+		}
+		std::pair<NavMeshNode*, float> closestNode = open[closestIndex];
+
+		open.erase(open.begin() + closestIndex);
+		return closestNode;
+	};
+
+	auto buildPath = [&] ()
+	{
+		while (pathTree->previous != nullptr)
+		{
+			path.insert(path.begin(), pathTree->node);
+			pathTree = pathTree->previous;
+		}
+	};
+
+	while (!open.empty())
+	{
+		std::pair<NavMeshNode*, float> Anode = closestNeighbor();
+
+		Path lastPath;
+		lastPath.node = Anode.first;
+		lastPath.previous = pathTree;
+		paths.emplace_back(lastPath);
+		pathTree = &paths[paths.size() - 1];
+
+		if (Anode.first == endNode)
+		{
+			buildPath;
+			return path;
+		}
+
+		visited.emplace_back(Anode);
+
+		placeNeighbors(Anode);
+	}
+	buildPath;
+	return path;
 }

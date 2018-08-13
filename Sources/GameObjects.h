@@ -38,8 +38,10 @@ struct AntQueen
 	Kore::vec3 position;
 	float radius;
 	const float queenSpeedPerSecond = 0.56f;
-	const float goalReachedRadius = 0.001f;
+	const float goalReachedRadius = 0.00001f;
 	Kore::vec3 goalPoisition;
+	std::vector<NavMeshNode*> path;
+	int pathIndex;
 };
 
 struct Storage

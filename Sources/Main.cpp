@@ -212,11 +212,11 @@ namespace {
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
 		//render islands
-		for (int i = 0; i < storage->nextIsland; ++i) {
+		/*for (int i = 0; i < storage->nextIsland; ++i) {
 			vec3& islandPosition = storage->islands[i]->position;
 			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()) * mat4::Scale(storage->islands[i]->radius));
 			planet->render(tex);
-		}
+		}*/
 
 		//render queen
 		AntQueen* antqueen = storage->antQueen;
@@ -418,10 +418,10 @@ namespace {
 		Kore::vec3 center;
 		float radius;
 		island->islands[0]->getBoundingBox(&center, &radius);
-		int id0 = createIsland(storage, center, radius, 100);
+		int id0 = createIsland(storage, center, radius, 100000);
 		
 		island->islands[1]->getBoundingBox(&center, &radius);
-		int id1 = createIsland(storage, center, radius, 100);
+		int id1 = createIsland(storage, center, radius, 100000);
 		
 		AntQueen* antqueen = storage->antQueen;
 		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
