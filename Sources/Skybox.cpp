@@ -18,7 +18,6 @@ Skybox::Skybox() {
 
 
 void Skybox::getSkybox(const Kore::Graphics4::VertexStructure& structure) {
-	float scale = 50;
 	
 	// Create Vertex Buffer
 	vertexBuffer = new Kore::Graphics4::VertexBuffer(24, structure);
@@ -78,6 +77,9 @@ void Skybox::render(Kore::Graphics4::TextureUnit tex) {
 	Kore::Graphics4::drawIndexedVertices();
 }
 
+float Skybox::getSkyboxScale() {
+	return scale;
+}
 
 
 

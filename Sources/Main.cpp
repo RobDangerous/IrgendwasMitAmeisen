@@ -157,6 +157,8 @@ namespace {
 		
 		forward = cameraUp.cross(right);  // cross product*/
 		
+		vec3 lastPos = cameraPos;
+		
 		// Move position of camera based on WASD keys
 		if (S || B) {
 			cameraPos -= camForward * (float) deltaT * CAMERA_MOVE_SPEED;
@@ -170,6 +172,10 @@ namespace {
 		if (D || R) {
 			cameraPos -= camRight * (float)deltaT * CAMERA_MOVE_SPEED;
 		}
+		
+		float skyboxLimit = skybox->getSkyboxScale();
+		if (!((cameraPos.x() > -skyboxLimit + 1) && (cameraPos.z() > -skyboxLimit + 1) && (cameraPos.z() < skyboxLimit - 1) && (cameraPos.x() < skyboxLimit - 1)  && (cameraPos.y() < skyboxLimit))) cameraPos = lastPos;
+		if (cameraPos.y() < 2) cameraPos.y() = 2;
 		
 		//mouse
 		if (leftMouseDown)
