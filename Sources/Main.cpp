@@ -62,9 +62,9 @@ namespace {
 
 	Graphics4::Texture* queenTex;
 
-	void loadLivingRoomShader() {
-		FileReader vs("shader_living_room.vert");
-		FileReader fs("shader_living_room.frag");
+	void loadShaderBasicLighting() {
+		FileReader vs("shader_basic_lighting.vert");
+		FileReader fs("shader_basic_lighting.frag");
 		Graphics4::Shader* vertexShader_living_room = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
 		Graphics4::Shader* fragmentShader_living_room = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 
@@ -459,7 +459,7 @@ int kore(int argc, char** argv) {
 	cameraPos = vec3(-5, 5, 5);
 
 	initWater();
-	loadLivingRoomShader();
+	loadShaderBasicLighting();
 	Ant::init();
 	Ant::updateDirections();
 	
