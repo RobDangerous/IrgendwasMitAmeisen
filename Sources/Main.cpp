@@ -251,7 +251,12 @@ namespace {
 		Graphics4::setMatrix(pLocation_basic_lighting, P);
 		queen->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 		
-		
+		/*
+		Graphics4::setMatrix(vLocation_basic_lighting, V);
+		Graphics4::setMatrix(pLocation_basic_lighting, P);
+		navMeshIsland0->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
+		*/
+
 		/*Graphics4::setTexture(tex, queenTex);
 
 		Graphics4::setVertexBuffer(*queen->vertexBuffers[0]);
@@ -479,7 +484,6 @@ namespace {
 		antqueen->goalPoisition = antqueen->position;
 		antqueen->radius = 0.5f;
 		storage->islands[id0]->antsOnIsland = 50;
-		createBridge(storage, id0, id1);
 	}
 }
 

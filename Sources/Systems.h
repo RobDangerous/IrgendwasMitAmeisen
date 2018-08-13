@@ -4,6 +4,8 @@
 #include <Kore/Math/Vector.h>
 #include "GameObjects.h"
 
+class MeshObject;
+
 //return the island ID
 int createIsland(Storage* storage, Kore::vec3 position, float radius, float ressources, MeshObject* navMesh);
 
