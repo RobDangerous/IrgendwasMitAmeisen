@@ -554,14 +554,6 @@ float bridgeLength(Storage* storage, Bridge* bridge) {
 }
 
 void Ant::moveEverybody(Storage* storage, float deltaTime) {
-	/*int ant = 0;
-	for (int i = 0; i < storage->nextBridge; ++i) {
-		Bridge* bridge = storage->bridges[i];
-		for (int a = 0; a < bridgeStepsCount(bridge); ++a) {
-			ants[ant++].position = bridgeStep(storage, bridge, a);
-		}
-	}*/
-
 	for (int i = 0; i < storage->nextIsland; ++i) {
 		IslandStruct* island = storage->islands[i];
 		int count = Kore::floor(island->antsOnIsland);
@@ -569,18 +561,21 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 		int found = 0;
 		for (int a = 0; a < maxAnts; ++a) {
 			if (ants[a].island == i) {
-				++found;
-			}
-			if (found == count) {
-				ants[a].island = -1;
+				if (found == count) {
+					ants[a].island = -1;
+				}
+				else {
+					++found;
+				}
 			}
 		}
 		if (found == count) {
 			continue;
 		}
 		for (int a = 0; a < maxAnts; ++a) {
-			if (ants[a].island == -1) {
+			if (ants[a].island == -1 && ants[a].bridge == -1) {
 				ants[a].island = i;
+				ants[a].bridge = -1;
 				ants[a].position = island->position + vec3(0.0f, 1.4f, 0.0f);
 				++found;
 			}
@@ -599,6 +594,46 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 				vec3 forward = ip - ants[a].position;
 				ants[a].forward = vec4(forward.x(), forward.y(), forward.z(), 0.0f);
 				ants[a].forward.normalize();
+			}
+		}
+	}
+
+	for (int i = 0; i < storage->nextBridge; ++i) {
+		Bridge* bridge = storage->bridges[i];
+		int count = bridgeStepsCount(bridge);
+		int found = 0;
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].bridge == i) {
+				if (found == count) {
+					ants[a].bridge = -1;
+				}
+				else {
+					++found;
+				}
+			}
+		}
+		if (found == count) {
+			continue;
+		}
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].island == -1 && ants[a].bridge == -1) {
+				ants[a].bridge = i;
+				ants[a].island = -1;
+				++found;
+			}
+			if (found == count) {
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < storage->nextBridge; ++i) {
+		Bridge* bridge = storage->bridges[i];
+		int count = bridgeStepsCount(bridge);
+		int step = 0;
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].bridge == i) {
+				ants[a].position = bridgeStep(storage, bridge, step++);
 			}
 		}
 	}
