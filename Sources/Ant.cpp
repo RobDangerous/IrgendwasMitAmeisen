@@ -19,6 +19,20 @@ int currentAnts = maxAnts;
 Ant ants[maxAnts];
 
 namespace {
+	vec3 deCasteljau(vec3* P, float u) {
+		const int n = 2;
+		vec3 Q[n + 1];
+		for (int i = 0; i <= n; ++i) {
+			Q[i] = P[i];
+		}
+		for (int k = 1; k <= n; ++k) {
+			for (int i = 0; i <= n - k; ++i) {
+				Q[i] = (1 - u) * Q[i] + u * Q[i + 1];
+			}
+		}
+		return Q[0];
+	}
+
 	vec3 getAxisVector(const mat4& transform, int i) {
 		return vec3(transform.data[i], transform.data[i + 4], transform.data[i + 8]);
 	}
@@ -302,6 +316,14 @@ void Ant::init() {
 	boxIndexBuffer->unlock();
 
 	boxTexture = new Graphics4::Texture("white.png");
+
+	vec3 P[3];
+	P[0] = vec3(0.0f, 1.0f, 0.0f);
+	P[1] = vec3(5.0f, 5.0f, 0.0f);
+	P[2] = vec3(10.0f, 1.0f, 0.0f);
+	for (int i = 0; i < 100; ++i) {
+		ants[i].position = deCasteljau(P, i / 100.0f);
+	}
 }
 
 void Ant::chooseScent(bool force) {
@@ -507,6 +529,7 @@ void Ant::move(float deltaTime) {
 }
 
 void Ant::moveEverybody(float deltaTime) {
+	return;
 	++count;
 	/*if (count % 10 == 0) {
 		Ant& ant = ants[Random::get(maxAnts - 1)];
