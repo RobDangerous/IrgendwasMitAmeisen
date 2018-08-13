@@ -60,8 +60,6 @@ namespace {
 	Graphics4::ConstantLocation specular_power_basic_lighting;
 	Graphics4::ConstantLocation lightPosLocation_basic_lighting;
 	Graphics4::ConstantLocation lightCount_basic_lighting;
-
-	Graphics4::Texture* queenTex;
 	
 	Graphics4::Texture* antTexture;
 	Graphics4::Texture* treeTexture;
@@ -107,7 +105,7 @@ namespace {
 	
 	Island* island;
 	
-	MeshObject* planet;
+	MeshObject* queen;
 	MeshObject* bridge;
 	Storage* storage;
 	
@@ -230,14 +228,23 @@ namespace {
 		}*/
 
 		//render queen
+		Graphics4::setPipeline(pipeline_basic_lighting);
 		AntQueen* antqueen = storage->antQueen;
-		planet->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * mat4::Scale(antqueen->radius).Transpose());
-		Graphics4::setTexture(tex, queenTex);
+		Kore::Quaternion rot = Kore::Quaternion(0, 0, 0, 1);
+		rot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+		queen->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * rot.matrix().Transpose() * mat4::Scale(1.0));
+		queen->setLights(lightCount_basic_lighting, lightPosLocation_basic_lighting);
+		Graphics4::setMatrix(vLocation_basic_lighting, V);
+		Graphics4::setMatrix(pLocation_basic_lighting, P);
+		queen->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
+		
+		
+		/*Graphics4::setTexture(tex, queenTex);
 
-		Graphics4::setVertexBuffer(*planet->vertexBuffers[0]);
-		Graphics4::setIndexBuffer(*planet->indexBuffers[0]);
+		Graphics4::setVertexBuffer(*queen->vertexBuffers[0]);
+		Graphics4::setIndexBuffer(*queen->indexBuffers[0]);
 		Graphics4::drawIndexedVertices();
-		planet->render(tex);
+		queen->render(tex);*/
 
 		//render bridges
 		for (int i = 0; i < storage->nextBridge; ++i) {
@@ -487,11 +494,10 @@ int kore(int argc, char** argv) {
 	// load the skybox and the ground
 	skybox = new Skybox();
 	skybox->getSkybox(structure);
-
-	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
+	
+	queen = new MeshObject("ant/AntBody_Queen.ogex", "ant/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
-	queenTex = new Graphics4::Texture("antQueen.png");
 	cameraPos = vec3(-1, 6, -5);
 
 	initWater();

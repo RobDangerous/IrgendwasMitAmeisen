@@ -205,6 +205,21 @@ void MeshObject::render(TextureUnit tex) {
 	}
 }
 
+void MeshObject::render(TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation) {
+	for (int i = 0; i < meshesCount; ++i) {
+		Geometry* geometry = geometries[i];
+		mat4 modelMatrix = M * geometry->transform;
+		Graphics4::setMatrix(mLocation, modelMatrix);
+		
+		Texture* image = images[i];
+		Graphics4::setTexture(tex, image);
+		
+		Graphics4::setVertexBuffer(*vertexBuffers[i]);
+		Graphics4::setIndexBuffer(*indexBuffers[i]);
+		Graphics4::drawIndexedVertices();
+	}
+}
+
 void MeshObject::render(TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation, Kore::Graphics4::ConstantLocation mLocationInverse, ConstantLocation diffuseLocation, ConstantLocation specularLocation, ConstantLocation specularPowerLocation) {
 	for (int i = 0; i < meshesCount; ++i) {
 		Geometry* geometry = geometries[i];
