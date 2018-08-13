@@ -105,6 +105,7 @@ namespace {
 	
 	MeshObject* planet;
 	MeshObject* bridge;
+	MeshObject* navMeshIsland0;
 	Storage* storage;
 
 	// Keyboard controls
@@ -459,6 +460,7 @@ int kore(int argc, char** argv) {
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
+	navMeshIsland0 = new MeshObject("IslandNavMesh/IslandNavMesh.ogex", "IslandNavMesh/", structure,1.0f);
 	queenTex = new Graphics4::Texture("antQueen.png");
 	cameraPos = vec3(-1, 6, -5);
 
