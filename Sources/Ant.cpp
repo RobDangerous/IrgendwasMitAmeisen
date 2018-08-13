@@ -638,6 +638,12 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 		}
 	}
 
+	for (int a = 0; a < maxAnts; ++a) {
+		if (ants[a].island == -1 && ants[a].bridge == -1) {
+			ants[a].position.y() = -2.0f;
+		}
+	}
+
 	return;
 	++count;
 	/*if (count % 10 == 0) {
