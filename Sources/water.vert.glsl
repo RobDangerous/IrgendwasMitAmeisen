@@ -84,7 +84,7 @@ vec3 calcNormal(float x, float z) {
     return normalize(vec3(map(x - eps, z) - map(x + eps, z), 2.0 * eps, map(x, z - eps) - map(x, z + eps)));
 }
 
-const vec3 light = normalize (vec3 (2, 1, 3));
+//const vec3 light = normalize (vec3 (2, 1, 3));
 
 // blinn phong code from http://schorsch.efi.fh-nuernberg.de/mshopf/index.php/Computergrafik/BlinnPhongInGLSL
 void main() {

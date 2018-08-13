@@ -53,5 +53,7 @@ extern int currentAnts;
 extern Ant ants[maxAnts];
 
 int bridgeStepsCount(Bridge* bridge);
+int bridgeCompleteStepsCount(Bridge* bridge);
 Kore::vec3 bridgeStep(Storage* storage, Bridge* bridge, int step);
 float bridgeLength(Storage* storage, Bridge* bridge);
+float bridgeCompleteLength(Storage* storage, Bridge* bridge);
