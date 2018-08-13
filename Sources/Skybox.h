@@ -7,9 +7,9 @@ class Skybox {
 	
 	Skybox();
 	
-	MeshObject* getSkybox();
+	void getSkybox(const Kore::Graphics4::VertexStructure& structure);
+	void render(Kore::Graphics4::TextureUnit tex);
 
 	private:
 	
-	void loadShader();
 };

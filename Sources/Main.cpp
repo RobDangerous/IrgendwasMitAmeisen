@@ -192,7 +192,14 @@ namespace {
 		
 		mat4 P = getProjectionMatrix();
 		mat4 V = getViewMatrix();
-
+		
+		Graphics4::setPipeline(pipeline);
+		Graphics4::setMatrix(vLocation, V);
+		Graphics4::setMatrix(pLocation, P);
+		
+		Graphics4::setMatrix(mLocation, mat4::Identity());
+		skybox->render(tex);
+		
 		renderWater(P * V, V, cameraPos, 0.0f);
 
 		Graphics4::setPipeline(pipeline_living_room);
@@ -206,8 +213,6 @@ namespace {
 		Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
-
-		
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
 			vec3& islandPosition = storage->islands[i]->position;
@@ -439,15 +444,14 @@ int kore(int argc, char** argv) {
 #ifdef NDEBUG
 	Mouse::the()->lock(0);
 #endif
-
-	// load the skybox and the ground
-	skybox = new Skybox();
-	skybox->getSkybox();
-
 	
 	island = new Island();
 	
 	loadShader();
+	// load the skybox and the ground
+	skybox = new Skybox();
+	skybox->getSkybox(structure);
+
 	planet = new MeshObject("Sphere/sphere.ogex", "Sphere/", structure, 1.0);
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
