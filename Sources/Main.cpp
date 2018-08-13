@@ -247,7 +247,7 @@ namespace {
 		queen->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 		
 		// Render resources
-		cake->setTransformation(mLocation, mat4::Translation(2, 0.6, 0) * rot.matrix().Transpose() * mat4::Scale(1.0));
+		cake->setTransformation(mLocation, mat4::Translation(0, 0.6, 0) * rot.matrix().Transpose() * mat4::Scale(1.4));
 		cake->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 		
 		
