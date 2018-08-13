@@ -167,11 +167,11 @@ Ant::Ant() : mode(Floor), active(true), island(-1), bridge(-1) {
 void Ant::updateDirections() {
 	for (int i = 0; i < maxAnts; ++i) {
 		Ant* ant = &ants[i];
-		int value = Random::get(2000);
+		/*int value = Random::get(2000);
 		value -= 1000;
 		float z = value / 1000.0f;
 		float x = Random::get(1) == 0 ? 1.0 - Kore::abs(z) : -1.0 + Kore::abs(z);
-		ant->forward = vec4(x, 0, z, 0);
+		ant->forward = vec4(x, 0, z, 0);*/
 		ant->forward.normalize();
 		ant->up = vec4(0, 1, 0, 0);
 		vec3 right = vec3(ant->up.x(), ant->up.y(), ant->up.z()).cross(ant->forward.xyz());
@@ -179,9 +179,9 @@ void Ant::updateDirections() {
 		ant->right.normalize();
 	
 		float angle = Kore::atan2(ant->forward.z(), ant->forward.x());
-		ant->rotation = Quaternion(vec3(ant->up.x(), ant->up.y(), ant->up.z()), angle + pi / 2.0f).matrix();
+		ant->rotation = Quaternion(vec3(ant->up.x(), ant->up.y(), ant->up.z()), angle + pi / 2.0f).matrix() * Quaternion(vec3(1.0f, 0.0f, 0.0f), pi / 2.0f).matrix();
 
-		ant->forward.setLength(0.5f + Random::get(500) / 1000.0f);
+		//ant->forward.setLength(0.5f + Random::get(500) / 1000.0f);
 	}
 }
 
@@ -534,8 +534,8 @@ int bridgeStepsCount(Bridge* bridge) {
 }
 
 vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
-	vec3 island1 = storage->islands[bridge->islandIDfrom]->position;
-	vec3 island2 = storage->islands[bridge->islandIDto]->position;
+	vec3 island1 = storage->islands[bridge->islandIDfrom]->position + vec3(0.0f, 1.4f, 0.0f);
+	vec3 island2 = storage->islands[bridge->islandIDto]->position + vec3(0.0f, 1.4f, 0.0f);
 	vec3 P[3];
 	P[0] = island1;
 	P[1] = (island2 + island1) / 2.0f;
@@ -594,6 +594,8 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 				vec3 forward = ip - ants[a].position;
 				ants[a].forward = vec4(forward.x(), forward.y(), forward.z(), 0.0f);
 				ants[a].forward.normalize();
+
+				//ants[a].rotation = Quaternion(ants[a].forward.xyz(), 0.0f).matrix();
 			}
 		}
 	}
@@ -643,6 +645,8 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 			ants[a].position.y() = -2.0f;
 		}
 	}
+
+	updateDirections();
 
 	return;
 	++count;
