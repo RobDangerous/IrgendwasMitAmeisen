@@ -217,6 +217,7 @@ namespace {
 		Ant::render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 
 		island->render(P, V);
+		//island->riseSeaLevel(deltaT);
 		
 		/*Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
@@ -267,6 +268,7 @@ namespace {
 		
 		g2->begin(false, width, height, false);
 		
+		g2->setImageScaleQuality(Graphics2::High);
 		// Show current ant count
 		g2->drawImage(antTexture, 10, 10);
 		g2->setFont(font44);

@@ -47,6 +47,10 @@ Island::Island() {
 	islands[1] = new MeshObject("island/island1.ogex", "island/", structure, 1.0);
 	islands[1]->M = mat4::Translation(15, 0.6, 15) * rot.matrix().Transpose();
 	islands[1]->xDim = 17.9354; islands[1]->yDim = 12.9319; islands[1]->zDim = 1.12583;
+	
+	islands[2] = new MeshObject("island/island2.ogex", "island/", structure, 1.0);
+	islands[2]->M = mat4::Translation(-15, 0.6, 20) * rot.matrix().Transpose();
+	islands[2]->xDim = 18.050; islands[1]->yDim = 17.821; islands[1]->zDim = 1.005;
 }
 
 void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
@@ -61,6 +65,12 @@ void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
 	for (int i = 0; i < maxIslands; ++i) {
 		islands[i]->setLights(lightCount, lightPosLocation);
 		islands[i]->render(tex, mLocation, mInverseLocation, diffuseLocation, specularLocation, specularPowerLocation);
+	}
+}
+
+void Island::riseSeaLevel(float deltaT) {
+	for (int i = 0; i < maxIslands; ++i) {
+		islands[i]->M = islands[i]->M * mat4::Translation(0, 0, -0.01 * deltaT);
 	}
 }
 
