@@ -196,6 +196,7 @@ namespace {
 				if (selected->id != queenIslandId)
 				{
 					//check if there is a bridge on between the islands
+					queenPathFromIslandToIsland(storage, queenIslandId, selected->id);
 				}
 				//vec3 queenGoalPosition = selected->position + vec3(0, queenHeightOffset, 0);
 				//storage->antQueen->goalPoisition = queenGoalPosition;
@@ -468,10 +469,10 @@ namespace {
 		Kore::vec3 center;
 		float radius;
 		island->islands[0]->getBoundingBox(&center, &radius);
-		int id0 = createIsland(storage, center, radius, 100000);
+		int id0 = createIsland(storage, center, radius, 100000, navMeshIsland0);
 		
 		island->islands[1]->getBoundingBox(&center, &radius);
-		int id1 = createIsland(storage, center, radius, 100000);
+		int id1 = createIsland(storage, center, radius, 100000, navMeshIsland0);
 		
 		AntQueen* antqueen = storage->antQueen;
 		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
