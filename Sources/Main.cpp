@@ -420,13 +420,9 @@ namespace {
 		Kore::vec3 center;
 		float radius;
 		island->islands[0]->getBoundingBox(&center, &radius);
-		radius = 5;
-		log(Info, "1: %f", radius);
 		int id0 = createIsland(storage, center, radius, 100);
 		
 		island->islands[1]->getBoundingBox(&center, &radius);
-		radius = 5;
-		log(Info, "2: %f", radius);
 		int id1 = createIsland(storage, center, radius, 100);
 		
 		AntQueen* antqueen = storage->antQueen;
