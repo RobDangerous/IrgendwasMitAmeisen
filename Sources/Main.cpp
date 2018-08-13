@@ -267,6 +267,7 @@ namespace {
 		
 		g2->begin(false, width, height, false);
 		
+		g2->setImageScaleQuality(Graphics2::High);
 		// Show current ant count
 		g2->drawImage(antTexture, 10, 10);
 		g2->setFont(font44);
