@@ -140,7 +140,7 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 	
 	vertexBuffers = new VertexBuffer*[meshesCount];
 	indexBuffers = new IndexBuffer*[meshesCount];
-	images = new Texture*[20];
+	images = new Texture*[30];
 	
 	for(int j = 0; j < meshesCount; ++j) {
 		Mesh* mesh = meshes[j];
