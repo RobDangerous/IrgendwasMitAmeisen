@@ -50,3 +50,7 @@ private:
 const int maxAnts = 500;
 extern int currentAnts;
 extern Ant ants[maxAnts];
+
+int bridgeStepsCount(Bridge* bridge);
+Kore::vec3 bridgeStep(Storage* storage, Bridge* bridge, int step);
+float bridgeLength(Storage* storage, Bridge* bridge);

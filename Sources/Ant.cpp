@@ -528,6 +528,30 @@ void Ant::move(float deltaTime) {
 	position += forward * 0.004f;
 }
 
+int bridgeStepsCount(Bridge* bridge) {
+	return Kore::floor(bridge->antsGathered);
+}
+
+vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
+	vec3 island1 = storage->islands[bridge->islandIDfrom]->position;
+	vec3 island2 = storage->islands[bridge->islandIDto]->position;
+	vec3 P[3];
+	P[0] = island1;
+	P[1] = (island2 + island1) / 2.0f;
+	P[1].y() = 5.0f;
+	P[2] = island2;
+	return deCasteljau(P, (step / bridge->antsGathered) * (bridge->antsGathered / bridge->antsNeeded));
+}
+
+float bridgeLength(Storage* storage, Bridge* bridge) {
+	float length = 0;
+	vec3 last = bridgeStep(storage, bridge, 0);
+	for (int i = 1; i < bridgeStepsCount(bridge); ++i) {
+		length += (bridgeStep(storage, bridge, i) - last).getLength();
+	}
+	return length;
+}
+
 void Ant::moveEverybody(Storage* storage, float deltaTime) {
 	int ant = 0;
 	for (int i = 0; i < storage->nextBridge; ++i) {
@@ -541,6 +565,13 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 		P[2] = island2;
 		for (int a = 0; a < Kore::floor(bridge->antsGathered); ++a) {
 			ants[ant++].position = deCasteljau(P, (a / bridge->antsGathered) * (bridge->antsGathered / bridge->antsNeeded));
+		}
+	}
+
+	for (int i = 0; i < storage->nextIsland; ++i) {
+		IslandStruct* island = storage->islands[i];
+		for (int a = 0; a < Kore::floor(island->antsOnIsland); ++a) {
+
 		}
 	}
 
