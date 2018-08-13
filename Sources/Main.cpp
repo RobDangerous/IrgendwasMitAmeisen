@@ -48,55 +48,55 @@ namespace {
 	Graphics4::ConstantLocation vLocation;
 	Graphics4::ConstantLocation mLocation;
 
-	Graphics4::PipelineState* pipeline_living_room;
-	Graphics4::TextureUnit tex_living_room;
-	Graphics4::ConstantLocation pLocation_living_room;
-	Graphics4::ConstantLocation vLocation_living_room;
-	Graphics4::ConstantLocation mLocation_living_room;
-	Graphics4::ConstantLocation mLocation_living_room_inverse;
-	Graphics4::ConstantLocation diffuse_living_room;
-	Graphics4::ConstantLocation specular_living_room;
-	Graphics4::ConstantLocation specular_power_living_room;
-	Graphics4::ConstantLocation lightPosLocation_living_room;
-	Graphics4::ConstantLocation lightCount_living_room;
+	Graphics4::PipelineState* pipeline_basic_lighting;
+	Graphics4::TextureUnit tex_basic_lighting;
+	Graphics4::ConstantLocation pLocation_basic_lighting;
+	Graphics4::ConstantLocation vLocation_basic_lighting;
+	Graphics4::ConstantLocation mLocation_basic_lighting;
+	Graphics4::ConstantLocation mLocation_basic_lighting_inverse;
+	Graphics4::ConstantLocation diffuse_basic_lighting;
+	Graphics4::ConstantLocation specular_basic_lighting;
+	Graphics4::ConstantLocation specular_power_basic_lighting;
+	Graphics4::ConstantLocation lightPosLocation_basic_lighting;
+	Graphics4::ConstantLocation lightCount_basic_lighting;
 
 	Graphics4::Texture* queenTex;
 
 	void loadShaderBasicLighting() {
 		FileReader vs("shader_basic_lighting.vert");
 		FileReader fs("shader_basic_lighting.frag");
-		Graphics4::Shader* vertexShader_living_room = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
-		Graphics4::Shader* fragmentShader_living_room = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
+		Graphics4::Shader* vertexShader_basic_lighting = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
+		Graphics4::Shader* fragmentShader_basic_lighting = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
 
-		Graphics4::VertexStructure structure_living_room;
-		structure_living_room.add("pos", Graphics4::Float3VertexData);
-		structure_living_room.add("tex", Graphics4::Float2VertexData);
-		structure_living_room.add("nor", Graphics4::Float3VertexData);
+		Graphics4::VertexStructure structure_basic_lighting;
+		structure_basic_lighting.add("pos", Graphics4::Float3VertexData);
+		structure_basic_lighting.add("tex", Graphics4::Float2VertexData);
+		structure_basic_lighting.add("nor", Graphics4::Float3VertexData);
 
-		pipeline_living_room = new Graphics4::PipelineState;
-		pipeline_living_room->inputLayout[0] = &structure_living_room;
-		pipeline_living_room->inputLayout[1] = nullptr;
-		pipeline_living_room->vertexShader = vertexShader_living_room;
-		pipeline_living_room->fragmentShader = fragmentShader_living_room;
-		pipeline_living_room->depthMode = Graphics4::ZCompareLess;
-		pipeline_living_room->depthWrite = true;
-		pipeline_living_room->blendSource = Graphics4::SourceAlpha;
-		pipeline_living_room->blendDestination = Graphics4::InverseSourceAlpha;
-		pipeline_living_room->alphaBlendSource = Graphics4::SourceAlpha;
-		pipeline_living_room->alphaBlendDestination = Graphics4::InverseSourceAlpha;
-		pipeline_living_room->compile();
+		pipeline_basic_lighting = new Graphics4::PipelineState;
+		pipeline_basic_lighting->inputLayout[0] = &structure_basic_lighting;
+		pipeline_basic_lighting->inputLayout[1] = nullptr;
+		pipeline_basic_lighting->vertexShader = vertexShader_basic_lighting;
+		pipeline_basic_lighting->fragmentShader = fragmentShader_basic_lighting;
+		pipeline_basic_lighting->depthMode = Graphics4::ZCompareLess;
+		pipeline_basic_lighting->depthWrite = true;
+		pipeline_basic_lighting->blendSource = Graphics4::SourceAlpha;
+		pipeline_basic_lighting->blendDestination = Graphics4::InverseSourceAlpha;
+		pipeline_basic_lighting->alphaBlendSource = Graphics4::SourceAlpha;
+		pipeline_basic_lighting->alphaBlendDestination = Graphics4::InverseSourceAlpha;
+		pipeline_basic_lighting->compile();
 
-		tex_living_room = pipeline_living_room->getTextureUnit("tex");
+		tex_basic_lighting = pipeline_basic_lighting->getTextureUnit("tex");
 
-		pLocation_living_room = pipeline_living_room->getConstantLocation("P");
-		vLocation_living_room = pipeline_living_room->getConstantLocation("V");
-		mLocation_living_room = pipeline_living_room->getConstantLocation("M");
-		mLocation_living_room_inverse = pipeline_living_room->getConstantLocation("MInverse");
-		diffuse_living_room = pipeline_living_room->getConstantLocation("diffuseCol");
-		specular_living_room = pipeline_living_room->getConstantLocation("specularCol");
-		specular_power_living_room = pipeline_living_room->getConstantLocation("specularPow");
-		lightPosLocation_living_room = pipeline_living_room->getConstantLocation("lightPos");
-		lightCount_living_room = pipeline_living_room->getConstantLocation("numLights");
+		pLocation_basic_lighting = pipeline_basic_lighting->getConstantLocation("P");
+		vLocation_basic_lighting = pipeline_basic_lighting->getConstantLocation("V");
+		mLocation_basic_lighting = pipeline_basic_lighting->getConstantLocation("M");
+		mLocation_basic_lighting_inverse = pipeline_basic_lighting->getConstantLocation("MInverse");
+		diffuse_basic_lighting = pipeline_basic_lighting->getConstantLocation("diffuseCol");
+		specular_basic_lighting = pipeline_basic_lighting->getConstantLocation("specularCol");
+		specular_power_basic_lighting = pipeline_basic_lighting->getConstantLocation("specularPow");
+		lightPosLocation_basic_lighting = pipeline_basic_lighting->getConstantLocation("lightPos");
+		lightCount_basic_lighting = pipeline_basic_lighting->getConstantLocation("numLights");
 	}
 
 	Skybox* skybox;
@@ -202,11 +202,11 @@ namespace {
 		
 		renderWater(P * V, V, cameraPos, 0.0f);
 
-		Graphics4::setPipeline(pipeline_living_room);
-		Ant::setLights(lightCount_living_room, lightPosLocation_living_room);
-		Graphics4::setMatrix(vLocation_living_room, V);
-		Graphics4::setMatrix(pLocation_living_room, P);
-		Ant::render(tex_living_room, mLocation_living_room, mLocation_living_room_inverse, diffuse_living_room, specular_living_room, specular_power_living_room);
+		Graphics4::setPipeline(pipeline_basic_lighting);
+		Ant::setLights(lightCount_basic_lighting, lightPosLocation_basic_lighting);
+		Graphics4::setMatrix(vLocation_basic_lighting, V);
+		Graphics4::setMatrix(pLocation_basic_lighting, P);
+		Ant::render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 
 		island->render(P, V);
 		

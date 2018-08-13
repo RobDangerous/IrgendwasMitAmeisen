@@ -177,9 +177,22 @@ MeshObject::MeshObject(const char* meshFile, const char* textureFile, const Vert
 		int* indices = indexBuffers[j]->lock();
 		setIndexFromMesh(indices, mesh);
 		indexBuffers[j]->unlock();
+		
+		mesh->xmin = 999999; mesh->ymin = 999999; mesh->zmin = 999999;
+		mesh->xmax = -999999; mesh->ymax = -999999; mesh->zmax = -999999;
+		for (int i = 0; i < mesh->numVertices; ++i) {
+			float x = mesh->vertices[i * 3 + 0] * vertexScale;
+			float y = mesh->vertices[i * 3 + 1] * vertexScale;
+			float z = mesh->vertices[i * 3 + 2] * vertexScale;
+			if (x < mesh->xmin) mesh->xmin = x;
+			if (x > mesh->xmax) mesh->xmax = x;
+			if (y < mesh->ymin) mesh->ymin = y;
+			if (y > mesh->ymax) mesh->ymax = y;
+			if (z < mesh->zmin) mesh->zmin = z;
+			if (z > mesh->zmax) mesh->zmax = z;
+		}
 	}
 }
-
 
 void MeshObject::render(TextureUnit tex) {
 	for (int i = 0; i < meshesCount; ++i) {		
@@ -701,5 +714,10 @@ void MeshObject::setLights(Kore::Graphics4::ConstantLocation lightCountLocation,
 	Graphics4::setFloats(lightPosLocation, (float*)lightPositions, lightCount * 4);
 }
 
+void MeshObject::getBoundingBox(Kore::vec3* center, float* radius) {
+	vec4 position = M * vec4(0, 0, 0, 1);
+	*center = Kore::vec3(position.x(), position.y(), position.z());
 
+	*radius = std::max(std::max(xDim, yDim), zDim);
+}
 

@@ -146,6 +146,10 @@ public:
 	
 	void setLights(Kore::Graphics4::ConstantLocation lightCountLocation, Kore::Graphics4::ConstantLocation lightPosLocation);
 	
+	void getBoundingBox(Kore::vec3* center, float* radius);
+	float xDim;
+	float yDim;
+	float zDim;
 	
 private:
 	void LoadObj(const char* filename);

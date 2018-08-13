@@ -8,6 +8,7 @@
 #include <Kore/Math/Core.h>
 #include <Kore/Math/Random.h>
 #include <Kore/System.h>
+#include <Kore/Log.h>
 
 #include "MeshObject.h"
 
@@ -41,14 +42,16 @@ Island::Island() {
 	loadShaderWithAlpha();
 	loadShaderWithoutAlpha();
 	
-	Kore::Quaternion treeRot = Kore::Quaternion(0, 0, 0, 1);
-	treeRot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+	Kore::Quaternion rot = Kore::Quaternion(0, 0, 0, 1);
+	rot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
 	
 	islands[0] = new MeshObject("island/island.ogex", "island/", structure, 1.0);
-	islands[0]->M = mat4::Translation(0, 0.6, 0) * treeRot.matrix().Transpose();
+	islands[0]->M = mat4::Translation(0, 0.6, 0) * rot.matrix().Transpose();
+	islands[0]->xDim = 18.050; islands[0]->yDim = 17.821; islands[0]->zDim = 1.005;
 	
 	islands[1] = new MeshObject("island/island1.ogex", "island/", structure, 1.0);
-	islands[1]->M = mat4::Translation(15, 0.6, 15) * treeRot.matrix().Transpose();
+	islands[1]->M = mat4::Translation(15, 0.6, 15) * rot.matrix().Transpose();
+	islands[0]->xDim = 17.9354; islands[0]->yDim = 12.9319; islands[0]->zDim = 1.12583;
 }
 
 void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
