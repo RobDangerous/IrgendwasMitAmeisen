@@ -191,6 +191,42 @@ bool selectIsland(Storage* storage, Kore::vec3 rayStart, Kore::vec3 rayDir, Isla
 	else return false;
 }
 
+void createBridgeNavMeshBetweenIslands(BridgeNavMesh* bridgeNavMesh, IslandStruct* island0, IslandStruct* island1)
+{
+	Kore::vec3 islandMidpoint = (island0->position + island1->position) * 0.5f;
+	auto closestNode = [&](IslandNavMesh* mesh, float& closest, NavMeshNode* node0)
+	{
+		for (int i = 0; mesh->nodes.size(); ++i)
+		{
+			Kore::vec3 pos = mesh->nodes[i]->position;
+			Kore::vec3 dist = islandMidpoint - pos;
+			float squareDist = dist.squareLength();
+			if (closest > squareDist)
+			{
+				closest = squareDist;
+				node0 = mesh->nodes[i];
+			}
+		}
+	};
+
+	//find the closest point to the midpoint
+	IslandNavMesh* navMesh0 = island0->navMesh;
+	float closest = std::numeric_limits<float>::max();
+	NavMeshNode* node0;
+
+	IslandNavMesh* navMesh1 = island1->navMesh;
+	NavMeshNode* node1;
+	
+	closestNode(navMesh0, closest, node0);
+	closest = std::numeric_limits<float>::max();
+	closestNode(navMesh1, closest, node1);
+
+	bridgeNavMesh->closestNodeIsland0 = node0;
+	bridgeNavMesh->closestNodeIsland1 = node1;
+	bridgeNavMesh->islandNavMesh0 = navMesh0;
+	bridgeNavMesh->islandNavMesh1 = navMesh1;
+}
+
 void moveQueen(AntQueen * queen, float deltaTime)
 {
 	Kore::vec3 direction = queen->goalPoisition - queen->position;

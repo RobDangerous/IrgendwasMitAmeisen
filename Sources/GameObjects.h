@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Kore/Math/Vector.h>
+#include "NavMesh.h"
 
 template <typename T>
 void initializeArrayOfPointers(T** arrayOfPointers, unsigned arraySize);
@@ -16,6 +17,8 @@ struct IslandStruct
 	float currentRessources;
 
 	float antsOnIsland;
+
+	IslandNavMesh* navMesh;
 };
 
 struct Bridge

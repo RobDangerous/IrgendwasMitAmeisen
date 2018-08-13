@@ -436,7 +436,6 @@ namespace {
 		storage->islands[id0]->antsOnIsland = 50;
 		createBridge(storage, id0, id1);
 	}
-
 }
 
 int kore(int argc, char** argv) {
