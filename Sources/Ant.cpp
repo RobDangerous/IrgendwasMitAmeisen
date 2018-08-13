@@ -534,6 +534,10 @@ int bridgeStepsCount(Bridge* bridge) {
 	return Kore::floor(bridge->antsGathered);
 }
 
+int bridgeCompleteStepsCount(Bridge* bridge) {
+	return Kore::floor(bridge->antsNeeded);
+}
+
 vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
 	vec3 island1 = storage->islands[bridge->islandIDfrom]->position + vec3(0.0f, 1.4f, 0.0f);
 	vec3 island2 = storage->islands[bridge->islandIDto]->position + vec3(0.0f, 1.4f, 0.0f);
@@ -542,13 +546,22 @@ vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
 	P[1] = (island2 + island1) / 2.0f;
 	P[1].y() = 5.0f;
 	P[2] = island2;
-	return deCasteljau(P, (step / bridge->antsGathered) * (bridge->antsGathered / bridge->antsNeeded));
+	return deCasteljau(P, step / (float)bridgeCompleteStepsCount(bridge));
 }
 
 float bridgeLength(Storage* storage, Bridge* bridge) {
 	float length = 0;
 	vec3 last = bridgeStep(storage, bridge, 0);
 	for (int i = 1; i < bridgeStepsCount(bridge); ++i) {
+		length += (bridgeStep(storage, bridge, i) - last).getLength();
+	}
+	return length;
+}
+
+float bridgeCompleteLength(Storage* storage, Bridge* bridge) {
+	float length = 0;
+	vec3 last = bridgeStep(storage, bridge, 0);
+	for (int i = 1; i < bridgeCompleteStepsCount(bridge); ++i) {
 		length += (bridgeStep(storage, bridge, i) - last).getLength();
 	}
 	return length;
