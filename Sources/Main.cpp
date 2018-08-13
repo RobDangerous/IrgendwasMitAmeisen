@@ -276,8 +276,6 @@ namespace {
 			
 			rotation.rotate(Kore::Quaternion(vec3(0, 0, 1), alpha));
 
-			
-
 			mat4 scale = mat4::Scale(1.0f, -bridgeProgressPercentage(logicBridge) * diff.getLength(), 1.0f);
 
 			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y()+0.25f, position.z()) * rotation.matrix().Transpose() * scale);
@@ -474,7 +472,7 @@ namespace {
 		int id1 = createIsland(storage, center, radius, 100);
 		
 		AntQueen* antqueen = storage->antQueen;
-		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
+		antqueen->position = vec3(2.0f, 1.7f, 2.0f);
 		antqueen->goalPoisition = antqueen->position;
 		antqueen->radius = 0.5f;
 		storage->islands[id0]->antsOnIsland = 50;
