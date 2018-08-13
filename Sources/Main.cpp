@@ -2,6 +2,7 @@
 
 #include <Kore/IO/FileReader.h>
 #include <Kore/Graphics1/Graphics.h>
+#include <Kore/Graphics2/Graphics.h>
 #include <Kore/Graphics4/Graphics.h>
 #include <Kore/Graphics4/PipelineState.h>
 #include <Kore/Graphics4/Shader.h>
@@ -61,6 +62,9 @@ namespace {
 	Graphics4::ConstantLocation lightCount_basic_lighting;
 
 	Graphics4::Texture* queenTex;
+	
+	Graphics4::Texture* antTexture;
+	Graphics4::Texture* treeTexture;
 
 	void loadShaderBasicLighting() {
 		FileReader vs("shader_basic_lighting.vert");
@@ -106,6 +110,12 @@ namespace {
 	MeshObject* planet;
 	MeshObject* bridge;
 	Storage* storage;
+	
+	Kore::Graphics2::Graphics2* g2;
+	Kravur* font14;
+	Kravur* font24;
+	Kravur* font34;
+	Kravur* font44;
 
 	// Keyboard controls
 	bool rotate = false;
@@ -123,9 +133,7 @@ namespace {
 	vec4 camForward(0.0f, 0.0f, 1.0f, 0.0f);
 	vec4 camRight(1.0f, 0.0f, 0.0f, 0.0f);
 	
-	Kore::Quaternion cameraRotation = Kore::Quaternion(0, 0, 0, 1);
 	vec3 cameraPos = vec3(0, 0, 0);
-	
 
 	Kore::mat4 getProjectionMatrix() {
 		mat4 P = mat4::Perspective(45, (float)width / (float)height, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
@@ -210,15 +218,15 @@ namespace {
 
 		island->render(P, V);
 		
-		Graphics4::setPipeline(pipeline);
+		/*Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);
 		Graphics4::setMatrix(pLocation, P);
 		//render islands
 		for (int i = 0; i < storage->nextIsland; ++i) {
 			vec3& islandPosition = storage->islands[i]->position;
-			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()));
+			planet->setTransformation(mLocation, mat4::Translation(islandPosition.x(), islandPosition.y(), islandPosition.z()) * mat4::Scale(storage->islands[i]->radius));
 			planet->render(tex);
-		}
+		}*/
 
 		//render queen
 		AntQueen* antqueen = storage->antQueen;
@@ -255,6 +263,25 @@ namespace {
 			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y()+0.25f, position.z()) * rotation.matrix().Transpose() * scale);
 			bridge->render(tex);
 		}
+		
+		
+		g2->begin(false, width, height, false);
+		
+		// Show current ant count
+		g2->drawImage(antTexture, 10, 10);
+		g2->setFont(font44);
+		char c1[42];
+		sprintf(c1, "%i", currentAnts);
+		g2->drawString(c1, 120, 10);
+		
+		// Show resources
+		g2->drawImage(treeTexture, 40, 60);
+		g2->setFont(font44);
+		char c2[42];
+		sprintf(c2, "todo");
+		g2->drawString(c2, 120, 60);
+		
+		g2->end();
 
 		Graphics4::end();
 		Graphics4::swapBuffers();
@@ -291,8 +318,8 @@ namespace {
 			case Kore::KeyR:
 				break;
 			case KeyL:
-				//Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
-				//Kore::log(Kore::LogLevel::Info, "Rotation: (%f, %f)", verticalAngle, horizontalAngle);
+				Kore::log(Kore::LogLevel::Info, "Position: (%f, %f, %f)", cameraPos.x(), cameraPos.y(), cameraPos.z());
+				Kore::log(Kore::LogLevel::Info, "Looking at: (%f, %f %f %f)", camForward.x(), camForward.y(), camForward.z(), camForward.w());
 				break;
 			case Kore::KeyEscape:
 			case KeyQ:
@@ -416,8 +443,15 @@ namespace {
 	void setUpGameLogic()
 	{
 		storage = new Storage();
-		int id0 = createIsland(storage, vec3(2.0f, 1.0f, 2.0f), 1, 100);
-		int id1 = createIsland(storage, vec3(4.0f, 1.0f, 4.0f), 1, 100);
+		
+		Kore::vec3 center;
+		float radius;
+		island->islands[0]->getBoundingBox(&center, &radius);
+		int id0 = createIsland(storage, center, radius, 100);
+		
+		island->islands[1]->getBoundingBox(&center, &radius);
+		int id1 = createIsland(storage, center, radius, 100);
+		
 		AntQueen* antqueen = storage->antQueen;
 		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
 		antqueen->goalPoisition = antqueen->position;
@@ -456,7 +490,7 @@ int kore(int argc, char** argv) {
 
 	bridge = new MeshObject("AntBridge/AntBridge.ogex", "AntBridge/", structure, 1.0);
 	queenTex = new Graphics4::Texture("antQueen.png");
-	cameraPos = vec3(-5, 5, 5);
+	cameraPos = vec3(-1, 6, -5);
 
 	initWater();
 	loadShaderBasicLighting();
@@ -464,6 +498,16 @@ int kore(int argc, char** argv) {
 	Ant::updateDirections();
 	
 	setUpGameLogic();
+	
+	font14 = Kravur::load("font/arial", FontStyle(), 14);
+	font24 = Kravur::load("font/arial", FontStyle(), 24);
+	font34 = Kravur::load("font/arial", FontStyle(), 34);
+	font44 = Kravur::load("font/arial", FontStyle(), 44);
+	g2 = new Graphics2::Graphics2(width, height);
+	g2->setFont(font44);
+	
+	antTexture = new Graphics4::Texture("ant/ant_tex.png");
+	treeTexture = new Graphics4::Texture("island/tree.png");
 
 	Kore::System::start();
 

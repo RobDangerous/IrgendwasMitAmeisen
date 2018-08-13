@@ -10,15 +10,10 @@
 #include <Kore/System.h>
 #include <Kore/Log.h>
 
-#include "MeshObject.h"
-
 using namespace Kore;
 using namespace Kore::Graphics4;
 
 namespace {
-	const int maxIslands = 2;
-	MeshObject* islands[maxIslands];
-	
 	Kore::Graphics4::VertexStructure structure;
 	Kore::Graphics4::Shader* vertexShader;
 	Kore::Graphics4::Shader* fragmentShader;
@@ -51,7 +46,7 @@ Island::Island() {
 	
 	islands[1] = new MeshObject("island/island1.ogex", "island/", structure, 1.0);
 	islands[1]->M = mat4::Translation(15, 0.6, 15) * rot.matrix().Transpose();
-	islands[0]->xDim = 17.9354; islands[0]->yDim = 12.9319; islands[0]->zDim = 1.12583;
+	islands[1]->xDim = 17.9354; islands[1]->yDim = 12.9319; islands[1]->zDim = 1.12583;
 }
 
 void Island::render(Kore::mat4 projectionMatrix, Kore::mat4 viewMatrix) {
