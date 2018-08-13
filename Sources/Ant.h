@@ -40,6 +40,7 @@ public:
 	float legRotation;
 	bool legRotationUp;
 	AntMode mode;
+	int island, bridge;
 private:
     //bool intersectsWith(MeshObject* obj, Kore::vec3 dir);
 	bool intersects(Kore::vec3 dir);

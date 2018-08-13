@@ -156,7 +156,7 @@ namespace {
 	}
 }
 
-Ant::Ant() : mode(Floor), active(true) {
+Ant::Ant() : mode(Floor), active(true), island(-1), bridge(-1) {
 	position = vec3(0.0f, 1.0f, 0.0f);
 	rotation = mat4::Identity();
 	forward = vec4(0, 0, -1, 0);
@@ -554,18 +554,52 @@ float bridgeLength(Storage* storage, Bridge* bridge) {
 }
 
 void Ant::moveEverybody(Storage* storage, float deltaTime) {
-	int ant = 0;
+	/*int ant = 0;
 	for (int i = 0; i < storage->nextBridge; ++i) {
 		Bridge* bridge = storage->bridges[i];
 		for (int a = 0; a < bridgeStepsCount(bridge); ++a) {
 			ants[ant++].position = bridgeStep(storage, bridge, a);
 		}
-	}
+	}*/
 
 	for (int i = 0; i < storage->nextIsland; ++i) {
 		IslandStruct* island = storage->islands[i];
-		for (int a = 0; a < Kore::floor(island->antsOnIsland); ++a) {
+		int count = Kore::floor(island->antsOnIsland);
+		if (count < 1) continue;
+		int found = 0;
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].island == i) {
+				++found;
+			}
+			if (found == count) {
+				ants[a].island = -1;
+			}
+		}
+		if (found == count) {
+			continue;
+		}
+		for (int a = 0; a < maxAnts; ++a) {
+			if (ants[a].island == -1) {
+				ants[a].island = i;
+				ants[a].position = island->position + vec3(0.0f, 1.4f, 0.0f);
+				++found;
+			}
+			if (found == count) {
+				break;
+			}
+		}
+	}
 
+	for (int a = 0; a < maxAnts; ++a) {
+		if (ants[a].island != -1) {
+			ants[a].position += ants[a].forward * 0.1f;
+			vec3 ip = storage->islands[ants[a].island]->position;
+			ip.y() = ants[a].position.y();
+			if ((ants[a].position - ip).getLength() >= storage->islands[ants[a].island]->radius * 0.5f) {
+				vec3 forward = ip - ants[a].position;
+				ants[a].forward = vec4(forward.x(), forward.y(), forward.z(), 0.0f);
+				ants[a].forward.normalize();
+			}
 		}
 	}
 
