@@ -217,6 +217,7 @@ namespace {
 		Ant::render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 
 		island->render(P, V);
+		//island->riseSeaLevel(deltaT);
 		
 		/*Graphics4::setPipeline(pipeline);
 		Graphics4::setMatrix(vLocation, V);

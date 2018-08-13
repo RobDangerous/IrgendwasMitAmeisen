@@ -205,6 +205,7 @@ void Ant::init() {
 	structures[1]->add("tint", Graphics4::Float4VertexData);
 
 	body = new MeshObject("ant/AntBody.ogex", "ant/", *structures[0], 10);
+	//body = new MeshObject("ant/AntBody_Queen.ogex", "ant/", *structures[0], 10);
 	leg = new MeshObject("ant/AntLeg.ogex", "ant/", *structures[0], 10);
 	feeler = new MeshObject("ant/AntFeeler.ogex", "ant/", *structures[0], 10);
 
