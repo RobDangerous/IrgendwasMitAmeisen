@@ -528,7 +528,22 @@ void Ant::move(float deltaTime) {
 	position += forward * 0.004f;
 }
 
-void Ant::moveEverybody(float deltaTime) {
+void Ant::moveEverybody(Storage* storage, float deltaTime) {
+	int ant = 0;
+	for (int i = 0; i < storage->nextBridge; ++i) {
+		Bridge* bridge = storage->bridges[i];
+		vec3 island1 = storage->islands[bridge->islandIDfrom]->position;
+		vec3 island2 = storage->islands[bridge->islandIDto]->position;
+		vec3 P[3];
+		P[0] = island1;
+		P[1] = (island2 + island1) / 2.0f;
+		P[1].y() = 5.0f;
+		P[2] = island2;
+		for (int a = 0; a < Kore::floor(bridge->antsGathered); ++a) {
+			ants[ant++].position = deCasteljau(P, (a / bridge->antsGathered) * (bridge->antsGathered / bridge->antsNeeded));
+		}
+	}
+
 	return;
 	++count;
 	/*if (count % 10 == 0) {

@@ -144,7 +144,7 @@ namespace {
 		lastTime = t;
 		
 		updateGameObjects(storage, deltaT);
-		Ant::moveEverybody(deltaT);
+		Ant::moveEverybody(storage, deltaT);
 
 		/*cameraUp = vec3(0, 1, 0);
 		right = vec3(Kore::sin(horizontalAngle - pi / 2.0), 0, Kore::cos(horizontalAngle - pi / 2.0));

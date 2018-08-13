@@ -5,6 +5,7 @@
 #include <Kore/Graphics4/Graphics.h>
 
 #include "MeshObject.h"
+#include "GameObjects.h"
 //#include "Engine/TriggerCollider.h"
 
 class InstancedMeshObject;
@@ -16,7 +17,7 @@ public:
 	static void init();
 	Ant();
 	void chooseScent(bool force);
-	static void moveEverybody(float deltaTime);
+	static void moveEverybody(Storage* storage, float deltaTime);
 	static void updateDirections();
 	void move(float deltaTime);
 	static void render(Kore::Graphics4::TextureUnit tex, Kore::Graphics4::ConstantLocation mLocation, Kore::Graphics4::ConstantLocation mLocationInverse, Kore::Graphics4::ConstantLocation diffuseLocation, Kore::Graphics4::ConstantLocation specularLocation, Kore::Graphics4::ConstantLocation specularPowerLocation);// Kore::Graphics4::ConstantLocation vLocation, Kore::Graphics4::TextureUnit tex, Kore::mat4 view);
