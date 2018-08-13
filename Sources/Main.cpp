@@ -109,6 +109,8 @@ namespace {
 	MeshObject* bridge;
 	Storage* storage;
 	
+	MeshObject* cake;
+	
 	Kore::Graphics2::Graphics2* g2;
 	Kravur* font14;
 	Kravur* font24;
@@ -244,6 +246,10 @@ namespace {
 		Graphics4::setMatrix(pLocation_basic_lighting, P);
 		queen->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 		
+		// Render resources
+		cake->setTransformation(mLocation, mat4::Translation(0, 0.6, 0) * rot.matrix().Transpose() * mat4::Scale(1.4));
+		cake->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
+		
 		
 		/*Graphics4::setTexture(tex, queenTex);
 
@@ -269,8 +275,6 @@ namespace {
 			float alpha = Kore::atan2(diff.x(), diff.z());
 			
 			rotation.rotate(Kore::Quaternion(vec3(0, 0, 1), alpha));
-
-			
 
 			mat4 scale = mat4::Scale(1.0f, -bridgeProgressPercentage(logicBridge) * diff.getLength(), 1.0f);
 
@@ -468,7 +472,7 @@ namespace {
 		int id1 = createIsland(storage, center, radius, 100);
 		
 		AntQueen* antqueen = storage->antQueen;
-		antqueen->position = vec3(2.0f, 1.0f + queenHeightOffset, 2.0f);
+		antqueen->position = vec3(2.0f, 1.7f, 2.0f);
 		antqueen->goalPoisition = antqueen->position;
 		antqueen->radius = 0.5f;
 		storage->islands[id0]->antsOnIsland = 50;
@@ -522,6 +526,9 @@ int kore(int argc, char** argv) {
 	
 	antTexture = new Graphics4::Texture("ant/ant_tex.png");
 	treeTexture = new Graphics4::Texture("island/tree.png");
+	
+	cake = new MeshObject("resources/cake.ogex", "resources/", structure, 1.0);
+	cake->M = mat4::Translation(0, 2, 0);
 
 	Kore::System::start();
 

@@ -590,7 +590,7 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 			if (ants[a].island == -1 && ants[a].bridge == -1) {
 				ants[a].island = i;
 				ants[a].bridge = -1;
-				ants[a].position = island->position + vec3(0.0f, 1.4f, 0.0f);
+				ants[a].position = island->position + vec3(0.0f, 1.0f, 0.0f);
 
 				int value = Random::get(2000);
 				value -= 1000;
