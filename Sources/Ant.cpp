@@ -665,6 +665,9 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 		if (ants[a].island == -1 && ants[a].bridge == -1) {
 			ants[a].position.y() = -2.0f;
 		}
+		else {
+			ants[a].legRotation += 0.2f;
+		}
 	}
 
 	updateDirections();
