@@ -279,7 +279,7 @@ namespace {
 			mat4 scale = mat4::Scale(1.0f, -bridgeProgressPercentage(logicBridge) * diff.getLength(), 1.0f);
 
 			bridge->setTransformation(mLocation, mat4::Translation(position.x(), position.y()+0.25f, position.z()) * rotation.matrix().Transpose() * scale);
-			bridge->render(tex);
+			//bridge->render(tex);
 		}
 		
 		
