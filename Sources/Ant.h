@@ -1,5 +1,5 @@
 #pragma once
-
+#include "pch.h"
 #include <Kore/Math/Vector.h>
 #include <Kore/Math/Quaternion.h>
 #include <Kore/Graphics4/Graphics.h>
@@ -54,6 +54,5 @@ extern Ant ants[maxAnts];
 
 int bridgeStepsCount(Bridge* bridge);
 int bridgeCompleteStepsCount(Bridge* bridge);
-Kore::vec3 bridgeStep(Storage* storage, Bridge* bridge, int step);
-float bridgeLength(Storage* storage, Bridge* bridge);
+Kore::vec3 bridgeStep(Storage* storage, Bridge* bridge, int step, int maxSteps);
 float bridgeCompleteLength(Storage* storage, Bridge* bridge);

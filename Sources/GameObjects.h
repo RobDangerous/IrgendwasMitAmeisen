@@ -1,5 +1,5 @@
 #pragma once
-
+#include "pch.h"
 #include <Kore/Math/Vector.h>
 #include "NavMesh.h"
 

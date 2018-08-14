@@ -538,7 +538,7 @@ int bridgeCompleteStepsCount(Bridge* bridge) {
 	return Kore::floor(bridge->antsNeeded);
 }
 
-vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
+vec3 bridgeStep(Storage* storage, Bridge* bridge, int step, int maxSteps) {
 	vec3 island1 = bridge->navMesh->closestNodeIsland0->position + vec3(0.0f, 1.4f, 0.0f);
 	vec3 island2 = bridge->navMesh->closestNodeIsland1->position + vec3(0.0f, 1.4f, 0.0f);
 	vec3 P[3];
@@ -546,23 +546,16 @@ vec3 bridgeStep(Storage* storage, Bridge* bridge, int step) {
 	P[1] = (island2 + island1) / 2.0f;
 	P[1].y() = 5.0f;
 	P[2] = island2;
-	return deCasteljau(P, step / (float)bridgeCompleteStepsCount(bridge));
-}
-
-float bridgeLength(Storage* storage, Bridge* bridge) {
-	float length = 0;
-	vec3 last = bridgeStep(storage, bridge, 0);
-	for (int i = 1; i < bridgeStepsCount(bridge); ++i) {
-		length += (bridgeStep(storage, bridge, i) - last).getLength();
-	}
-	return length;
+	return deCasteljau(P, step / (float)maxSteps);
 }
 
 float bridgeCompleteLength(Storage* storage, Bridge* bridge) {
 	float length = 0;
-	vec3 last = bridgeStep(storage, bridge, 0);
-	for (int i = 1; i < bridgeCompleteStepsCount(bridge); ++i) {
-		length += (bridgeStep(storage, bridge, i) - last).getLength();
+	vec3 last = bridgeStep(storage, bridge, 0, 100);
+	for (int i = 1; i < 100; ++i) {
+		vec3 temp = bridgeStep(storage, bridge, i, 100);
+		length += (temp - last).getLength();
+		last = temp;
 	}
 	return length;
 }
@@ -659,7 +652,7 @@ void Ant::moveEverybody(Storage* storage, float deltaTime) {
 		int step = 0;
 		for (int a = 0; a < maxAnts; ++a) {
 			if (ants[a].bridge == i) {
-				ants[a].position = bridgeStep(storage, bridge, step++);
+				ants[a].position = bridgeStep(storage, bridge, step++, bridgeCompleteStepsCount(bridge));
 			}
 		}
 	}

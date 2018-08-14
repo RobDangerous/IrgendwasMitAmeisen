@@ -1,4 +1,4 @@
-#include <Kore/pch.h>
+
 #include "Systems.h"
 #include <math.h>
 #include <utility>
@@ -38,7 +38,7 @@ int createIsland(Storage* storage, Kore::vec3 position, float radius, float ress
 	island->initialRessources = ressources;
 	island->currentRessources = ressources;
 	
-	IslandNavMesh* islandNavMesh = new IslandNavMesh(navMesh->meshes[0], island, position);
+	IslandNavMesh* islandNavMesh = new IslandNavMesh(navMesh->meshes[0], island, position + Kore::vec3(0,1.5f,0));
 	island->navMesh = islandNavMesh;
 	int id = storage->nextIsland++;
 	island->id = id;
@@ -124,7 +124,7 @@ void updateBridge(Bridge* bridge, Storage* storage, float deltaTime)
 		if (fromIsland->antsOnIsland >= antsConsumedForBridge)
 		{
 			bridge->antsGathered += antsConsumedForBridge;
-			//Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
+			Kore::log(Kore::LogLevel::Info, "Bridge %i is building and has %f ants on it.", bridge->id, bridge->antsGathered);
 			fromIsland->antsOnIsland -= antsConsumedForBridge;
 			//Kore::log(Kore::LogLevel::Info, "Bridge %i build removed %f ants from island %i", bridge->id, antsConsumedForBridge, bridge->islandIDfrom);
 			if (isBridgeDone(bridge))
@@ -159,7 +159,7 @@ void calcAntsNeededForBridge(Storage* storage, Bridge* bridge)
 
 float bridgeProgressPercentage(Bridge* bridge)
 {
-	float percentage = bridge->antsGathered / bridge->antsNeeded;
+	float percentage = bridge->antsGathered / (bridge->antsNeeded + 0.00001f);
 	return Kore::min(percentage,1.0f);
 }
 
@@ -251,17 +251,21 @@ void createBridgeNavMeshPath(Bridge* bridge, Storage* storage)
 	int count = bridgeStepsCount(bridge);
 	for (int i = 0; i < count; ++i)
 	{
-		Kore::vec3 position = bridgeStep(storage, bridge, i);
+		Kore::vec3 position = bridgeStep(storage, bridge, i, bridgeCompleteStepsCount(bridge));
 		NavMeshNode* bridgeNode = new NavMeshNode();
 		bridgeNode->position = position;
 		if (i > 0)
 		{
-			bridgeNode->neighbors.emplace_back(bridgeNodes[i - 1]);
+			bridgeNode->neighbors.emplace_back(bridgeNodes.back());
+			bridgeNodes.back()->neighbors.emplace_back(bridgeNode);
 		}
 		bridgeNodes.emplace_back(bridgeNode);
 	}
 	bridgeNodes[0]->neighbors.emplace_back(bridge->navMesh->closestNodeIsland0);
+	bridge->navMesh->closestNodeIsland0->neighbors.emplace_back(bridgeNodes[0]);
 	bridgeNodes.back()->neighbors.emplace_back(bridge->navMesh->closestNodeIsland1);
+	bridge->navMesh->closestNodeIsland1->neighbors.emplace_back(bridgeNodes.back());
+	bridge->navMesh->nodes = bridgeNodes;
 }
 
 int queenOnIsland(Storage* storage)

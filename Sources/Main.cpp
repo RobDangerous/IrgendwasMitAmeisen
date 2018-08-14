@@ -247,17 +247,13 @@ namespace {
 		AntQueen* antqueen = storage->antQueen;
 		Kore::Quaternion rot = Kore::Quaternion(0, 0, 0, 1);
 		rot.rotate(Kore::Quaternion(vec3(1, 0, 0), -Kore::pi / 2.0));
+
 		queen->setTransformation(mLocation, mat4::Translation(antqueen->position.x(), antqueen->position.y(), antqueen->position.z()) * rot.matrix().Transpose() * mat4::Scale(1.0));
 		queen->setLights(lightCount_basic_lighting, lightPosLocation_basic_lighting);
 		Graphics4::setMatrix(vLocation_basic_lighting, V);
 		Graphics4::setMatrix(pLocation_basic_lighting, P);
 		queen->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
 		
-		/*
-		Graphics4::setMatrix(vLocation_basic_lighting, V);
-		Graphics4::setMatrix(pLocation_basic_lighting, P);
-		navMeshIsland0->render(tex_basic_lighting, mLocation_basic_lighting, mLocation_basic_lighting_inverse, diffuse_basic_lighting, specular_basic_lighting, specular_power_basic_lighting);
-		*/
 
 
 		// Render resources
